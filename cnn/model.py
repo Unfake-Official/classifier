@@ -1,16 +1,18 @@
 import tensorflow as tf
 
 # CNN model sketch:
+
+
 class Classifier(tf.keras.Model):
     def __init__(self):
         super(Classifier, self).__init__()
 
         # convolution + feature extraction
-        self.conv1 = tf.keras.layers.Conv2D(16, (16,16), activation='relu')
+        self.conv1 = tf.keras.layers.Conv2D(16, (16, 16), activation='relu')
         self.max_pool1 = tf.keras.layers.MaxPool2D(pool_size=2, strides=2)
-        self.conv2 = tf.keras.layers.Conv2D(32, (16,16), activation='relu')
+        self.conv2 = tf.keras.layers.Conv2D(32, (16, 16), activation='relu')
         self.max_pool2 = tf.keras.layers.MaxPool2D(pool_size=2, strides=2)
-        self.conv3 = tf.keras.layers.Conv2D(64, (16,16), activation='relu')
+        self.conv3 = tf.keras.layers.Conv2D(64, (16, 16), activation='relu')
         self.max_pool3 = tf.keras.layers.MaxPool2D(pool_size=2, strides=2)
         self.dropout = tf.keras.layers.Dropout(0.5)
 
