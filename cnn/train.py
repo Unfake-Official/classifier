@@ -2,7 +2,6 @@ import os
 import tensorflow as tf
 from model import Classifier
 from trainer import Trainer
-import matplotlib.pyplot as plt
 
 EPOCHS = 100
 BATCH_SIZE = 32

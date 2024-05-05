@@ -1,17 +1,19 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from model import Classifier
+from tqdm import tqdm
 
 class Trainer:
-    def __init__(self, model: tf.keras.Model):
+    def __init__(self, model: Classifier):
         self.model = model
-        self.loss_obj = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        self.loss_obj = tf.keras.losses.CategoricalCrossentropy()
         self.optimizer = tf.keras.optimizers.Adam()
 
         # loss metrics
         self.train_loss = tf.keras.metrics.MeanSquaredError(name='train_loss')
-        self.train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
+        self.train_accuracy = tf.keras.metrics.CategoricalAccuracy(name='train_accuracy')
         self.test_loss = tf.keras.metrics.MeanSquaredError(name='test_loss')
-        self.test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
+        self.test_accuracy = tf.keras.metrics.CategoricalAccuracy(name='test_accuracy')
 
         # metrics history
         self.train_loss_history = []
@@ -42,7 +44,6 @@ class Trainer:
 
         plt.savefig(output)
 
-    @tf.function
     def train_step(self, images, labels):
         with tf.GradientTape() as tape:
             predictions = self.model(images, training=True)
@@ -50,19 +51,18 @@ class Trainer:
         gradients = tape.gradient(loss, self.model.trainable_variables)
         self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
 
-        self.train_loss(loss)
+        self.train_loss(labels, predictions)
         self.train_accuracy(labels, predictions)
 
-    @tf.function
     def test_step(self, images, labels):
         predictions = self.model(images, training=False)
         loss = self.loss_obj(labels, predictions)
 
-        self.test_loss(loss)
+        self.test_loss(labels, predictions)
         self.test_accuracy(labels, predictions)
 
     def train(self, epochs: int, train_ds, test_ds, checkpoint_path: str, metrics_path: str):
-        for _ in range(epochs):
+        for _ in tqdm(range(epochs)):
             self.train_loss.reset_states()
             self.train_accuracy.reset_states()
             self.test_loss.reset_states()
