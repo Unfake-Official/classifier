@@ -9,8 +9,8 @@ VALIDATION_SPLIT = 0.2
 
 IMG_SIZE = (256, 256)
 
-CHECKPOINT_PATH = 'checkpoints'
-METRICS_PATH = 'metrics/metrics.png'
+CHECKPOINT_PATH = 'cnn/checkpoints/model'
+METRICS_PATH = 'cnn/metrics/metrics.png'
 '''
 dataset folder with the following structure:
 main_directory/
@@ -32,8 +32,6 @@ DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\Dataset'
 model = Classifier()
 # if os.path.exists(CHECKPOINT_PATH):
 #     model.load_weights(CHECKPOINT_PATH)
-# else:
-#     os.mkdir(CHECKPOINT_PATH)
 
 train_ds, test_ds = tf.keras.utils.image_dataset_from_directory(
     DATASET_PATH,
