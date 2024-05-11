@@ -33,6 +33,7 @@ model = Classifier()
 # if os.path.exists(CHECKPOINT_PATH):
 #     model.load_weights(CHECKPOINT_PATH)
 
+# todo: Configure dataset for performance (cache and prefetch)
 train_ds, test_ds = tf.keras.utils.image_dataset_from_directory(
     DATASET_PATH,
     label_mode='categorical',
