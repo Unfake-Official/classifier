@@ -30,8 +30,8 @@ main_directory/
 DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\Dataset'
 
 model = Classifier()
-# if os.path.exists(CHECKPOINT_PATH):
-#     model.load_weights(CHECKPOINT_PATH)
+if os.path.exists(CHECKPOINT_PATH):
+    model.load_model(CHECKPOINT_PATH)
 
 # todo: Configure dataset for performance (cache and prefetch)
 train_ds, test_ds = tf.keras.utils.image_dataset_from_directory(
