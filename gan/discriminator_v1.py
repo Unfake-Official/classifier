@@ -3,56 +3,43 @@ Reference: https://www.geeksforgeeks.org/generative-adversarial-network-gan/
 '''
 import tensorflow as tf
 
-class DCGAN_generator(tf.Module):
-  """
-  Attributes
-  ----------
-    ngpu : int
-      The number of available GPU devices
-  """
-  def __init__(self, ngpu):
-    """Init function
-    Parameters
-    ----------
-      ngpu : int
-        The number of available GPU devices
-    """
-    super(DCGAN_generator, self).__init__()
-    self.ngpu = ngpu
-    
-    nz = 100 # noise dimension
-    ngf = 64 # number of features map on the first layer
-    nc = 3 # number of channels
+class Discriminator(tf.Module):
+    def __init__(self):
+        super(Discriminator, self).__init__()
 
-    self.main = nn.Sequential(
-      # input is Z, going into a convolution
-      nn.ConvTranspose2d(     nz, ngf * 4, 4, 1, 0, bias=False),
-      nn.BatchNorm2d(ngf * 4),
-      nn.ReLU(True),
-      # state size. (ngf*8) x 4 x 4
-      nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1, bias=False),
-      nn.BatchNorm2d(ngf * 2),
-      nn.ReLU(True),
-      # state size. (ngf*4) x 8 x 8
-      nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False),
-      nn.BatchNorm2d(ngf),
-      nn.ReLU(True),
-      # state size. (ngf*2) x 16 x 16
-      nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
-      nn.Tanh()
-      # state size. (nc) x 64 x 64
-    )
+        self.conv1 = tf.keras.layers.Conv2D(32, (3,3), strides=2, activation='leaky_relu')
+        self.dropout1 = tf.keras.layers.Dropout(0.25)
+        self.conv2 = tf.keras.layers.Conv2D(64, (3,3), strides=2, activation='leaky_relu')
+        self.batch_norm1 = tf.keras.layers.BatchNormalization(momentum=0.82)
+        self.dropout2 = tf.keras.layers.Dropout(0.25)
+        self.conv3 = tf.keras.layers.Conv2D(128, (3,3), strides=2, activation='leaky_relu')
+        self.batch_norm2 = tf.keras.layers.BatchNormalization(momentum=0.82)
+        self.dropout3 = tf.keras.layers.Dropout(0.25)
+        self.conv3 = tf.keras.layers.Conv2D(128, (3,3), strides=2, activation='leaky_relu')
+        self.batch_norm2 = tf.keras.layers.BatchNormalization(momentum=0.82)
+        self.dropout3 = tf.keras.layers.Dropout(0.25)
+        self.conv4 = tf.keras.layers.Conv2D(256, (3,3), strides=1, activation='leaky_relu')
+        self.batch_norm3 = tf.keras.layers.BatchNormalization(momentum=0.8)
+        self.dropout4 = tf.keras.layers.Dropout(0.25)
 
-  def forward(self, input):
-    """Forward function
-    Parameters
-    ----------
-    input : :py:class:`torch.Tensor`
-    
-    Returns
-    -------
-    :py:class:`torch.Tensor`
-      the output of the generator (i.e. an image)
-    """
-    output = self.main(input)
-    return output
+        self.flatten = tf.keras.layers.Flatten(),
+        self.d1 = tf.keras.layers.Dense(256 * 5 * 5, activation='leaky_relu')
+        self.d2 = tf.keras.layers.Dense(1, activation='sigmoid')
+
+    def call(self, x):
+        x = self.conv1(x)
+        x = self.dropout1(x)
+        x = self.conv2(x)
+        x = self.batch_norm1(x)
+        x = self.dropout2(x)
+        x = self.conv3(x)
+        x = self.batch_norm2(x)
+        x = self.dropout3(x)
+        x = self.conv4(x)
+        x = self.batch_norm3(x)
+        x = self.dropout4(x)
+
+        x = self.flatten(x)
+        x = self.d1(x)
+        x = self.d2(x)
+        return x
