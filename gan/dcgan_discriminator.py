@@ -1,8 +1,8 @@
 import tensorflow as tf
 
-class Discriminator(tf.keras.Model):
+class DCGAN_Discriminator(tf.keras.Model):
     def __init__(self):
-        super(Discriminator, self).__init__()
+        super(DCGAN_Discriminator, self).__init__()
 
         self.conv1 = tf.keras.layers.Conv2D(64, (4, 4), strides=(2, 2), padding='same', use_bias=False)
         self.batch1 = tf.keras.layers.BatchNormalization()

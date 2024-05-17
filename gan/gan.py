@@ -4,8 +4,8 @@ Reference: https://www.geeksforgeeks.org/generative-adversarial-network-gan/
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
-from discriminator import Discriminator
-from generator import Generator
+from gan.discriminator_v1 import Discriminator
+from gan.generator_v1 import Generator
 
 # Set device
 device = 'cuda' if tf.test.is_gpu_available() else 'cpu'
