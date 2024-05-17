@@ -1,6 +1,7 @@
 from dcgan_generator import DCGAN_Generator
 from dcgan_discriminator import DCGAN_Discriminator
 from resnet import ResidualBlock, ResNet
+import tensorflow as tf
 
 # data for plotting purposes
 generatorLosses = []
@@ -14,110 +15,112 @@ netD = DCGAN_Discriminator(1)
 netC = ResNet(ResidualBlock, [2, 2, 2, 2])
 
 # optimizers
-optD = optim.Adam(netD.parameters(), lr=0.0002, betas=(0.5, 0.999), weight_decay = 1e-3)
-optG = optim.Adam(netG.parameters(), lr=0.0002, betas=(0.5, 0.999))
-optC = optim.Adam(netC.parameters(), lr=0.0002, betas=(0.5, 0.999), weight_decay = 1e-3)
+optD = tf.keras.optimizers.Adam()
+#optim.Adam(netD.parameters(), lr=0.0002, betas=(0.5, 0.999), weight_decay = 1e-3)
+optG = tf.keras.optimizers.Adam()
+#optG = optim.Adam(netG.parameters(), lr=0.0002, betas=(0.5, 0.999))
+optC = tf.keras.optimizers.Adam()
+#optC = optim.Adam(netC.parameters(), lr=0.0002, betas=(0.5, 0.999), weight_decay = 1e-3)
 
 advWeight = 0.1 # adversarial weight
 
-loss = nn.BCELoss()
-criterion = nn.CrossEntropyLoss()
+loss = tf.keras.losses.BinaryCrossentropy()
+criterion = tf.keras.losses.CrossEntropyLoss()
 
 def train(datasetLoader):
-  file.write(text)
-  for epoch in range(epochs):
-  netC.train()
 
-  running_loss = 0.0
-  total_train = 0
-  correct_train = 0
-  for i, data in enumerate(subTrainLoader, 0):
+    for epoch in range(epochs):
+    netC.train()
 
-    dataiter = iter(subTrainLoader)
-    inputs, labels = dataiter.next()
-    inputs, labels = inputs.to(device), labels.to(device)
-    tmpBatchSize = len(labels)
+    running_loss = 0.0
+    total_train = 0
+    correct_train = 0
+    for i, data in enumerate(subTrainLoader, 0):
 
-    # create label arrays
-    true_label = torch.ones(tmpBatchSize, 1, device=device)
-    fake_label = torch.zeros(tmpBatchSize, 1, device=device)
+        dataiter = iter(subTrainLoader)
+        inputs, labels = dataiter.next()
+        inputs, labels = inputs.to(device), labels.to(device)
+        tmpBatchSize = len(labels)
 
-    r = torch.randn(tmpBatchSize, 100, 1, 1, device=device)
-    fakeImageBatch = netG(r)
+        # create label arrays
+        true_label = torch.ones(tmpBatchSize, 1, device=device)
+        fake_label = torch.zeros(tmpBatchSize, 1, device=device)
 
-    real_cpu = data[0].to(device)
-    batch_size = real_cpu.size(0)
+        r = torch.randn(tmpBatchSize, 100, 1, 1, device=device)
+        fakeImageBatch = netG(r)
 
-    # train discriminator on real images
-    predictionsReal = netD(inputs)
-    lossDiscriminator = loss(predictionsReal, true_label) #labels = 1
-    lossDiscriminator.backward(retain_graph = True)
+        real_cpu = data[0].to(device)
+        batch_size = real_cpu.size(0)
 
-    # train discriminator on fake images
-    predictionsFake = netD(fakeImageBatch)
-    lossFake = loss(predictionsFake, fake_label) #labels = 0
-    lossFake.backward(retain_graph= True)
-    optD.step() # update discriminator parameters
+        # train discriminator on real images
+        predictionsReal = netD(inputs)
+        lossDiscriminator = loss(predictionsReal, true_label) #labels = 1
+        lossDiscriminator.backward(retain_graph = True)
 
-    # train generator
-    optG.zero_grad()
-    predictionsFake = netD(fakeImageBatch)
-    lossGenerator = loss(predictionsFake, true_label) #labels = 1
-    lossGenerator.backward(retain_graph = True)
-    optG.step()
+        # train discriminator on fake images
+        predictionsFake = netD(fakeImageBatch)
+        lossFake = loss(predictionsFake, fake_label) #labels = 0
+        lossFake.backward(retain_graph= True)
+        optD.step() # update discriminator parameters
 
-    torch.autograd.set_detect_anomaly(True)
-    fakeImageBatch = fakeImageBatch.detach().clone()
+        # train generator
+        optG.zero_grad()
+        predictionsFake = netD(fakeImageBatch)
+        lossGenerator = loss(predictionsFake, true_label) #labels = 1
+        lossGenerator.backward(retain_graph = True)
+        optG.step()
 
-    # train classifier on real data
-    predictions = netC(inputs)
-    realClassifierLoss = criterion(predictions, labels)
-    realClassifierLoss.backward(retain_graph=True)
+        torch.autograd.set_detect_anomaly(True)
+        fakeImageBatch = fakeImageBatch.detach().clone()
 
-    optC.step()
-    optC.zero_grad()
+        # train classifier on real data
+        predictions = netC(inputs)
+        realClassifierLoss = criterion(predictions, labels)
+        realClassifierLoss.backward(retain_graph=True)
 
-    # update the classifer on fake data
-    predictionsFake = netC(fakeImageBatch)
-    # get a tensor of the labels that are most likely according to model
-    predictedLabels = torch.argmax(predictionsFake, 1) # -> [0 , 5, 9, 3, ...]
-    confidenceThresh = .2
+        optC.step()
+        optC.zero_grad()
 
-    # psuedo labeling threshold
-    probs = F.softmax(predictionsFake, dim=1)
-    mostLikelyProbs = np.asarray([probs[i, predictedLabels[i]].item() for  i in range(len(probs))])
-    toKeep = mostLikelyProbs > confidenceThresh
-    if sum(toKeep) != 0:
-        fakeClassifierLoss = criterion(predictionsFake[toKeep], predictedLabels[toKeep]) * advWeight
-        fakeClassifierLoss.backward()
+        # update the classifer on fake data
+        predictionsFake = netC(fakeImageBatch)
+        # get a tensor of the labels that are most likely according to model
+        predictedLabels = torch.argmax(predictionsFake, 1) # -> [0 , 5, 9, 3, ...]
+        confidenceThresh = .2
 
-    optC.step()
+        # psuedo labeling threshold
+        probs = F.softmax(predictionsFake, dim=1)
+        mostLikelyProbs = np.asarray([probs[i, predictedLabels[i]].item() for  i in range(len(probs))])
+        toKeep = mostLikelyProbs > confidenceThresh
+        if sum(toKeep) != 0:
+            fakeClassifierLoss = criterion(predictionsFake[toKeep], predictedLabels[toKeep]) * advWeight
+            fakeClassifierLoss.backward()
 
-    # reset the gradients
-    optD.zero_grad()
-    optG.zero_grad()
-    optC.zero_grad()
+        optC.step()
 
-    # save losses for graphing
-    generatorLosses.append(lossGenerator.item())
-    discriminatorLosses.append(lossDiscriminator.item())
-    classifierLosses.append(realClassifierLoss.item())
+        # reset the gradients
+        optD.zero_grad()
+        optG.zero_grad()
+        optC.zero_grad()
 
-    # get train accurcy
-    if(i % 100 == 0):
-      netC.eval()
-      # accuracy
-      _, predicted = torch.max(predictions, 1)
-      total_train += labels.size(0)
-      correct_train += predicted.eq(labels.data).sum().item()
-      train_accuracy = 100 * correct_train / total_train
-      text = ("Train Accuracy: " + str(train_accuracy))
-      file.write(text + '\n')
-      netC.train()
+        # save losses for graphing
+        generatorLosses.append(lossGenerator.item())
+        discriminatorLosses.append(lossDiscriminator.item())
+        classifierLosses.append(realClassifierLoss.item())
 
-  print("Epoch " + str(epoch) + "Complete")
+        # get train accurcy
+        if(i % 100 == 0):
+        netC.eval()
+        # accuracy
+        _, predicted = torch.max(predictions, 1)
+        total_train += labels.size(0)
+        correct_train += predicted.eq(labels.data).sum().item()
+        train_accuracy = 100 * correct_train / total_train
+        text = ("Train Accuracy: " + str(train_accuracy))
+        netC.train()
 
-  # save gan image
-  gridOfFakeImages = torchvision.utils.make_grid(fakeImageBatch.cpu())
-  torchvision.utils.save_image(gridOfFakeImages, "/content/gridOfFakeImages/" + str(epoch) + '_' + str(i) + '.png')
-  validate()
+    print("Epoch " + str(epoch) + "Complete")
+
+    # save gan image
+    gridOfFakeImages = torchvision.utils.make_grid(fakeImageBatch.cpu())
+    torchvision.utils.save_image(gridOfFakeImages, "/content/gridOfFakeImages/" + str(epoch) + '_' + str(i) + '.png')
+    validate()
