@@ -28,9 +28,8 @@ loss = tf.keras.losses.BinaryCrossentropy()
 criterion = tf.keras.losses.CrossEntropyLoss()
 
 def train(datasetLoader):
-
     for epoch in range(epochs):
-    netC.train()
+        netC.train()
 
     running_loss = 0.0
     total_train = 0
@@ -109,14 +108,14 @@ def train(datasetLoader):
 
         # get train accurcy
         if(i % 100 == 0):
-        netC.eval()
-        # accuracy
-        _, predicted = torch.max(predictions, 1)
-        total_train += labels.size(0)
-        correct_train += predicted.eq(labels.data).sum().item()
-        train_accuracy = 100 * correct_train / total_train
-        text = ("Train Accuracy: " + str(train_accuracy))
-        netC.train()
+            netC.eval()
+            # accuracy
+            _, predicted = torch.max(predictions, 1)
+            total_train += labels.size(0)
+            correct_train += predicted.eq(labels.data).sum().item()
+            train_accuracy = 100 * correct_train / total_train
+            text = ("Train Accuracy: " + str(train_accuracy))
+            netC.train()
 
     print("Epoch " + str(epoch) + "Complete")
 
