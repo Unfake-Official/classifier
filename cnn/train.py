@@ -1,6 +1,6 @@
 import os
 import tensorflow as tf
-from model import Classifier
+from cnn.classifier import Classifier
 from trainer import Trainer
 
 EPOCHS = 100

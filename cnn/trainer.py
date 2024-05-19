@@ -1,6 +1,6 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from model import Classifier
+from cnn.classifier import Classifier
 from tqdm import tqdm
 import os
 import sys
@@ -61,7 +61,6 @@ class Trainer:
 
     def test_step(self, images, labels):
         predictions = self.model(images, training=False)
-        loss = self.loss_obj(labels, predictions)
 
         self.test_loss(labels, predictions)
         self.test_accuracy(labels, predictions)

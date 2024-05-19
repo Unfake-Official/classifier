@@ -8,7 +8,6 @@ class Classifier(tf.keras.Model):
         super(Classifier, self).__init__()
 
         # convolution + feature extraction
-        # todo: change filters size
         self.conv1 = tf.keras.layers.Conv2D(16, (3, 3))
         self.batch_norm1 = tf.keras.layers.BatchNormalization()
         self.relu1 = tf.keras.layers.Activation('relu')
@@ -21,7 +20,7 @@ class Classifier(tf.keras.Model):
         self.batch_norm3 = tf.keras.layers.BatchNormalization()
         self.relu3 = tf.keras.layers.Activation('relu')
         self.max_pool3 = tf.keras.layers.MaxPool2D(pool_size=2, strides=2)
-        
+
         self.dropout = tf.keras.layers.Dropout(0.5)
 
         # dense layer + output

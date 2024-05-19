@@ -1,4 +1,4 @@
-from model import Classifier
+from cnn.classifier import Classifier
 import numpy as np
 import tensorflow as tf
 
