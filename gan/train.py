@@ -1,125 +1,50 @@
-from dcgan_generator import DCGAN_Generator
-from dcgan_discriminator import DCGAN_Discriminator
-from resnet import ResidualBlock, ResNet
+import os
 import tensorflow as tf
+from cnn.classifier import Classifier
+from trainer import Trainer
 
-# data for plotting purposes
-generatorLosses = []
-discriminatorLosses = []
-classifierLosses = []
+EPOCHS = 100
+BATCH_SIZE = 32
+VALIDATION_SPLIT = 0.2
 
-epochs = 100
+IMG_SIZE = (256, 256)
 
-netG = DCGAN_Generator(1)
-netD = DCGAN_Discriminator(1)
-netC = ResNet(ResidualBlock, [2, 2, 2, 2])
+G_CHECKPOINT_PATH = 'gan/checkpoints/generator'
+D_CHECKPOINT_PATH = 'gan/checkpoints/discriminator'
+C_CHECKPOINT_PATH = 'gan/checkpoints/classifier'
+METRICS_PATH = 'cnn/metrics/metrics.png'
+'''
+dataset folder with the following structure:
+main_directory/
+    fake/
+        img1
+        img2
+        ...
+    other/
+        img1
+        img2
+        ...
+    real/
+        img1
+        img2
+        ...
+'''
+DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\Dataset'
 
-# optimizers
-optD = tf.keras.optimizers.Adam()
-#optim.Adam(netD.parameters(), lr=0.0002, betas=(0.5, 0.999), weight_decay = 1e-3)
-optG = tf.keras.optimizers.Adam()
-#optG = optim.Adam(netG.parameters(), lr=0.0002, betas=(0.5, 0.999))
-optC = tf.keras.optimizers.Adam()
-#optC = optim.Adam(netC.parameters(), lr=0.0002, betas=(0.5, 0.999), weight_decay = 1e-3)
+# todo: Configure dataset for performance (cache and prefetch)
+train_ds, test_ds = tf.keras.utils.image_dataset_from_directory(
+    DATASET_PATH,
+    label_mode='categorical',
+    color_mode='grayscale',
+    validation_split=VALIDATION_SPLIT,
+    subset='both',
+    seed=123,
+    image_size=IMG_SIZE,
+    batch_size=BATCH_SIZE)
 
-advWeight = 0.1 # adversarial weight
-
-loss = tf.keras.losses.BinaryCrossentropy()
-criterion = tf.keras.losses.CrossEntropyLoss()
-
-def train(datasetLoader):
-    for epoch in range(epochs):
-        netC.train()
-
-    running_loss = 0.0
-    total_train = 0
-    correct_train = 0
-    for i, data in enumerate(subTrainLoader, 0):
-
-        dataiter = iter(subTrainLoader)
-        inputs, labels = dataiter.next()
-        inputs, labels = inputs.to(device), labels.to(device)
-        tmpBatchSize = len(labels)
-
-        # create label arrays
-        true_label = torch.ones(tmpBatchSize, 1, device=device)
-        fake_label = torch.zeros(tmpBatchSize, 1, device=device)
-
-        r = torch.randn(tmpBatchSize, 100, 1, 1, device=device)
-        fakeImageBatch = netG(r)
-
-        real_cpu = data[0].to(device)
-        batch_size = real_cpu.size(0)
-
-        # train discriminator on real images
-        predictionsReal = netD(inputs)
-        lossDiscriminator = loss(predictionsReal, true_label) #labels = 1
-        lossDiscriminator.backward(retain_graph = True)
-
-        # train discriminator on fake images
-        predictionsFake = netD(fakeImageBatch)
-        lossFake = loss(predictionsFake, fake_label) #labels = 0
-        lossFake.backward(retain_graph= True)
-        optD.step() # update discriminator parameters
-
-        # train generator
-        optG.zero_grad()
-        predictionsFake = netD(fakeImageBatch)
-        lossGenerator = loss(predictionsFake, true_label) #labels = 1
-        lossGenerator.backward(retain_graph = True)
-        optG.step()
-
-        torch.autograd.set_detect_anomaly(True)
-        fakeImageBatch = fakeImageBatch.detach().clone()
-
-        # train classifier on real data
-        predictions = netC(inputs)
-        realClassifierLoss = criterion(predictions, labels)
-        realClassifierLoss.backward(retain_graph=True)
-
-        optC.step()
-        optC.zero_grad()
-
-        # update the classifer on fake data
-        predictionsFake = netC(fakeImageBatch)
-        # get a tensor of the labels that are most likely according to model
-        predictedLabels = torch.argmax(predictionsFake, 1) # -> [0 , 5, 9, 3, ...]
-        confidenceThresh = .2
-
-        # psuedo labeling threshold
-        probs = F.softmax(predictionsFake, dim=1)
-        mostLikelyProbs = np.asarray([probs[i, predictedLabels[i]].item() for  i in range(len(probs))])
-        toKeep = mostLikelyProbs > confidenceThresh
-        if sum(toKeep) != 0:
-            fakeClassifierLoss = criterion(predictionsFake[toKeep], predictedLabels[toKeep]) * advWeight
-            fakeClassifierLoss.backward()
-
-        optC.step()
-
-        # reset the gradients
-        optD.zero_grad()
-        optG.zero_grad()
-        optC.zero_grad()
-
-        # save losses for graphing
-        generatorLosses.append(lossGenerator.item())
-        discriminatorLosses.append(lossDiscriminator.item())
-        classifierLosses.append(realClassifierLoss.item())
-
-        # get train accurcy
-        if(i % 100 == 0):
-            netC.eval()
-            # accuracy
-            _, predicted = torch.max(predictions, 1)
-            total_train += labels.size(0)
-            correct_train += predicted.eq(labels.data).sum().item()
-            train_accuracy = 100 * correct_train / total_train
-            text = ("Train Accuracy: " + str(train_accuracy))
-            netC.train()
-
-    print("Epoch " + str(epoch) + "Complete")
-
-    # save gan image
-    gridOfFakeImages = torchvision.utils.make_grid(fakeImageBatch.cpu())
-    torchvision.utils.save_image(gridOfFakeImages, "/content/gridOfFakeImages/" + str(epoch) + '_' + str(i) + '.png')
-    validate()
+trainer = Trainer()
+trainer.train(epochs=EPOCHS, train_ds=train_ds, test_ds=test_ds,
+              generator_checkpoint_path=G_CHECKPOINT_PATH,
+              discriminator_checkpoint_path=D_CHECKPOINT_PATH,
+              classifier_checkpoint_path=C_CHECKPOINT_PATH,
+              metrics_path=METRICS_PATH)
