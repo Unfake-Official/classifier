@@ -1,6 +1,6 @@
 import os
 import tensorflow as tf
-from cnn.classifier import Classifier
+from classifier import Classifier
 from trainer import Trainer
 
 EPOCHS = 100
@@ -27,11 +27,12 @@ main_directory/
         img2
         ...
 '''
-DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\Dataset'
+DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset'
 
 model = Classifier()
 if os.path.exists(CHECKPOINT_PATH):
-    model.load_model(CHECKPOINT_PATH)
+    tf.keras.models.load_model(CHECKPOINT_PATH)
+    print('Model loaded successfully')
 
 # todo: Configure dataset for performance (cache and prefetch)
 train_ds, test_ds = tf.keras.utils.image_dataset_from_directory(

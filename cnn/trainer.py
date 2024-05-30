@@ -1,6 +1,6 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from cnn.classifier import Classifier
+from classifier import Classifier
 from tqdm import tqdm
 import os
 import sys
