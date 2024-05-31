@@ -98,7 +98,7 @@ class Trainer:
         fake_label = tf.ones(batch_size)
 
         # generate random noise to feed generator
-        noise = tf.random.normal([batch_size, 100, 1, 1])
+        noise = tf.random.normal([batch_size, 256, 1, 1])
         fake_images = self.generator(noise, training=True)
 
         with tf.GradientTape() as tape:
@@ -106,7 +106,7 @@ class Trainer:
             predictions_discriminator_real = self.discriminator(images, training=True)
             loss_discriminator_real = self.loss(true_label, predictions_discriminator_real)
 
-             # train discriminator on real images
+            # train discriminator on fake images
             predictions_discriminator_fake = self.discriminator(fake_images, training=True)
             loss_discriminator_fake = self.loss(fake_label, predictions_discriminator_fake)
 
@@ -173,7 +173,7 @@ class Trainer:
         fake_label = tf.ones(batch_size)
 
         # generate random noise to feed generator
-        noise = tf.random.normal([batch_size, 100, 1, 1])
+        noise = tf.random.normal([batch_size, 256, 1, 1])
         fake_images = self.generator(noise, training=False)
 
         predictions_discriminator_real = self.discriminator(images, training=False)

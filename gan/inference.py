@@ -7,12 +7,12 @@ CHECKPOINT_PATH = 'checkpoints/checkpoint'
 model = Classifier()
 model = tf.keras.models.load_model(CHECKPOINT_PATH)
 
-IMG_PATH = ''
+IMG_PATH = r''
 IMG_SIZE = (256, 256)
 
 class_names=['fake', 'other', 'real']
 
-img = tf.keras.utils.load_img(IMG_PATH, target_size=IMG_SIZE)
+img = tf.keras.utils.load_img(IMG_PATH, grayscale=True, target_size=IMG_SIZE)
 img_array = tf.keras.utils.img_to_array(img)
 img_array = tf.expand_dims(img_array, 0)
 

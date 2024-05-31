@@ -32,6 +32,6 @@ class DCGAN_Discriminator(tf.keras.Model):
         x = self.conv4(x)
         x = self.sigmoid(x)
 
-        tf.squeeze(tf.reshape(x, (-1, 1)), axis=1)
+        tf.squeeze(tf.reshape(x, (-1, 1)))
 
         return x
