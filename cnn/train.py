@@ -31,7 +31,7 @@ DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset'
 
 model = Classifier()
 if os.path.exists(CHECKPOINT_PATH):
-    tf.keras.models.load_model(CHECKPOINT_PATH)
+    model = tf.keras.models.load_model(CHECKPOINT_PATH)
     print('Model loaded successfully')
 
 # todo: Configure dataset for performance (cache and prefetch)

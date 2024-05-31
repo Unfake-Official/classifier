@@ -5,7 +5,7 @@ import tensorflow as tf
 CHECKPOINT_PATH = 'checkpoints/checkpoint'
 
 model = Classifier()
-model.load_model(CHECKPOINT_PATH)
+model = tf.keras.models.load_model(CHECKPOINT_PATH)
 
 IMG_PATH = ''
 IMG_SIZE = (256, 256)

@@ -2,12 +2,12 @@ from cnn.classifier import Classifier
 import numpy as np
 import tensorflow as tf
 
-CHECKPOINT_PATH = 'checkpoints/checkpoint'
+CHECKPOINT_PATH = 'cnn/checkpoints/model'
 
 model = Classifier()
-model.load_model(CHECKPOINT_PATH)
+model = tf.keras.models.load_model(CHECKPOINT_PATH)
 
-IMG_PATH = ''
+IMG_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Espectrogramas\SHEILA_F031_Fake_Spectrograms\1.png'
 IMG_SIZE = (256, 256)
 
 class_names=['fake', 'other', 'real']

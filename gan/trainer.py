@@ -5,18 +5,18 @@ import os
 
 from dcgan_generator import DCGAN_Generator
 from dcgan_discriminator import DCGAN_Discriminator
-from cnn.classifier import Classifier
+from classifier import Classifier
 
 
 class Trainer:
-    def __init__(self):
-        self.classifier = Classifier()
-        self.generator = DCGAN_Generator()
-        self.discriminator = DCGAN_Discriminator()
+    def __init__(self, classifier: Classifier, generator: DCGAN_Generator, discriminator: DCGAN_Discriminator):
+        self.classifier = classifier
+        self.generator = generator
+        self.discriminator = discriminator
 
         # optimizers
-        self.optimizer_discriminator = tf.keras.optimizers.Adam(learning_rate=0.0002, beta1=0.5, beta2=0.999, weight_decay=1e-3)
-        self.optimizer_generator = tf.keras.optimizers.Adam(learning_rate=0.0002, beta1=0.5, beta2=0.999, weight_decay=1e-3)
+        self.optimizer_discriminator = tf.keras.optimizers.Adam(learning_rate=0.0002, beta_1=0.5, beta_2=0.999, weight_decay=1e-3)
+        self.optimizer_generator = tf.keras.optimizers.Adam(learning_rate=0.0002, beta_1=0.5, beta_2=0.999, weight_decay=1e-3)
         self.optimizer_classifier = tf.keras.optimizers.Adam()
 
         # losses
@@ -118,8 +118,7 @@ class Trainer:
 
         # train generator
         with tf.GradientTape() as tape:
-            predictions_discriminator_given_generator_images = self.discriminator(fake_images, training=True)
-            loss_generator = self.loss(true_label, predictions_discriminator_given_generator_images)
+            loss_generator = self.loss(true_label, predictions_discriminator_fake)
 
         gradients = tape.gradient(loss_generator, self.generator.trainable_variables)
         self.optimizer_generator.apply_gradients(zip(gradients, self.generator.trainable_variables))
@@ -140,7 +139,7 @@ class Trainer:
             confidence_thresh = 0.2
 
             # Pseudo labeling threshold
-            probs = tf.nn.softmax(predictions_discriminator_given_generator_images , axis=1)
+            probs = tf.nn.softmax(predictions_discriminator_fake , axis=1)
             most_likely_probs = tf.gather_nd(probs, tf.stack((tf.range(tf.size(predicted_labels)), predicted_labels), axis=1))
 
             to_keep = tf.greater(most_likely_probs, confidence_thresh)
@@ -148,7 +147,7 @@ class Trainer:
 
             if tf.reduce_sum(tf.cast(to_keep, tf.int32)) != 0:
                 # Compute fake classifier loss only if there are samples to keep
-                fake_classifier_loss = self.criterion(tf.gather(predictions_discriminator_given_generator_images, to_keep_indices),
+                fake_classifier_loss = self.criterion(tf.gather(predictions_discriminator_fake, to_keep_indices),
                                                     tf.gather(predicted_labels, to_keep_indices)) * self.adversarial_weight
 
         gradients = tape.gradient(fake_classifier_loss, self.classifier.trainable_variables)
@@ -160,8 +159,8 @@ class Trainer:
         self.train_accuracy_discriminator(true_label, predictions_discriminator_real)
         self.train_accuracy_discriminator(fake_label, predictions_discriminator_fake)
 
-        self.train_loss_generator(true_label, predictions_discriminator_given_generator_images)
-        self.train_accuracy_generator(fake_label, predictions_discriminator_given_generator_images)
+        self.train_loss_generator(true_label, predictions_discriminator_fake)
+        self.train_accuracy_generator(true_label, predictions_discriminator_fake)
 
         self.train_loss_classifier(labels, predictions_classifier_real)
         self.train_loss_classifier(labels, predictions_classifier_fake)
@@ -180,8 +179,6 @@ class Trainer:
         predictions_discriminator_real = self.discriminator(images, training=False)
         predictions_discriminator_fake = self.discriminator(fake_images, training=False)
 
-        predictions_discriminator_given_generator_images = self.discriminator(fake_images, training=False)
-
         predictions_classifier_real = self.classifier(images, training=False)
         predictions_classifier_fake = self.classifier(fake_images, training=False)
 
@@ -191,8 +188,8 @@ class Trainer:
         self.train_accuracy_discriminator(true_label, predictions_discriminator_real)
         self.train_accuracy_discriminator(fake_label, predictions_discriminator_fake)
 
-        self.train_loss_generator(true_label, predictions_discriminator_given_generator_images)
-        self.train_accuracy_generator(true_label, predictions_discriminator_given_generator_images)
+        self.train_loss_generator(true_label, predictions_discriminator_fake)
+        self.train_accuracy_generator(true_label, predictions_discriminator_fake)
 
         self.train_loss_classifier(labels, predictions_classifier_real)
         self.train_loss_classifier(labels, predictions_classifier_fake)
@@ -247,4 +244,7 @@ class Trainer:
             self.test_accuracy_history_classifier.append(self.test_accuracy_generator.result())
 
             self.generator.save(os.path.join(generator_checkpoint_path))
+            self.discriminator.save(os.path.join(discriminator_checkpoint_path))
+            self.classifier.save(os.path.join(classifier_checkpoint_path))
+
             self.plot(metrics_path)

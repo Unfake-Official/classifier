@@ -68,7 +68,7 @@ class Trainer:
     def train(self, epochs: int, train_ds, test_ds, checkpoint_path: str, metrics_path: str):
         print(f'Number of epochs: {epochs}')
 
-        patience = 10
+        patience = 15
         wait = 0
         best = sys.maxsize
 
