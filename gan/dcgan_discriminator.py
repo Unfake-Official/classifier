@@ -17,6 +17,7 @@ class DCGAN_Discriminator(tf.keras.Model):
         self.leaky_relu3 = tf.keras.layers.LeakyReLU(alpha=0.2)
 
         self.conv4 = tf.keras.layers.Conv2D(1, (4, 4), strides=(1, 1), padding='valid', use_bias=False)
+        self.flatten = tf.keras.layers.Flatten()
         self.sigmoid = tf.keras.layers.Activation('sigmoid')
 
     def call(self, x):
@@ -30,8 +31,8 @@ class DCGAN_Discriminator(tf.keras.Model):
         x = self.batch3(x)
         x = self.leaky_relu3(x)
         x = self.conv4(x)
+        x = self.flatten(x)
+        x = tf.reduce_mean(x, axis=1)
         x = self.sigmoid(x)
-
-        tf.squeeze(tf.reshape(x, (-1, 1)))
 
         return x
