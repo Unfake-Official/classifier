@@ -119,22 +119,22 @@ class Trainer:
             self.optimizer_discriminator.apply_gradients(zip(gradients, self.discriminator.trainable_variables))
 
             with tf.GradientTape() as classifier_tape:
-                # Update classifier on fake data
+                # train classifier on fake data
                 predictions_classifier_fake = self.classifier(fake_images, training=True)
                 predicted_labels = tf.argmax(predictions_classifier_fake, axis=1)
 
-                confidence_thresh = 0.2
+                confidence_thresh = 0.5
 
-                # Pseudo labeling threshold
-                probs = tf.nn.softmax(predictions_discriminator_fake, axis=1)
-                most_likely_probs = tf.gather_nd(probs, tf.stack((tf.range(tf.size(predicted_labels)), predicted_labels), axis=1))
+                # pseudo labeling threshold
+                probs = tf.nn.softmax(predictions_classifier_fake, axis=1)
+                most_likely_probs = tf.gather_nd(probs, tf.stack(tf.range(tf.size(predicted_labels)), tf.cast(predicted_labels, tf.int32), axis=1))
 
                 to_keep = tf.greater(most_likely_probs, confidence_thresh)
-                to_keep_indices = tf.where(to_keep)[:, 0]  # Get indices where condition is True
+                to_keep_indices = tf.where(to_keep)[:, 0] # get indices where condition is True
 
                 if tf.reduce_sum(tf.cast(to_keep, tf.int32)) != 0:
-                    # Compute fake classifier loss only if there are samples to keep
-                    fake_classifier_loss = self.criterion(tf.gather(predictions_discriminator_fake, to_keep_indices),
+                    # compute fake classifier loss only if there are samples to keep
+                    fake_classifier_loss = self.criterion(tf.gather(predictions_classifier_fake, to_keep_indices),
                                                         tf.gather(predicted_labels, to_keep_indices)) * self.adversarial_weight
 
             gradients = classifier_tape.gradient(fake_classifier_loss, self.classifier.trainable_variables)
@@ -244,8 +244,8 @@ class Trainer:
             self.test_loss_history_classifier.append(self.test_loss_generator.result())
             self.test_accuracy_history_classifier.append(self.test_accuracy_generator.result())
 
-            self.generator.save(os.path.join(generator_checkpoint_path))
-            self.discriminator.save(os.path.join(discriminator_checkpoint_path))
-            self.classifier.save(os.path.join(classifier_checkpoint_path))
+            self.generator.save(generator_checkpoint_path)
+            self.discriminator.save(discriminator_checkpoint_path)
+            self.classifier.save(classifier_checkpoint_path)
 
             self.plot(metrics_path)
