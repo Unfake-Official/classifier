@@ -94,13 +94,14 @@ class Trainer:
         fig.savefig(output, dpi=fig.dpi)
 
     def train_step(self, images, labels, batch_size):
+
         true_label = tf.ones(batch_size)
         fake_label = tf.ones(batch_size)
 
         with tf.GradientTape() as generator_tape:
             with tf.GradientTape() as classifier_tape:
                 # generate random noise to feed generator
-                noise = tf.random.normal([batch_size, 256, 1, 1])
+                noise = tf.random.normal([batch_size, 16, 16, 256])
                 fake_images = self.generator(noise, training=True)
 
                 with tf.GradientTape() as discriminator_tape:
@@ -139,11 +140,8 @@ class Trainer:
                 if tf.reduce_sum(tf.cast(to_keep, tf.int32)) != 0:
                     # compute fake classifier loss only if there are samples to keep
 
-                    print(predictions_classifier_fake)
-                    print(predicted_labels)
-
-                    fake_classifier_loss = self.criterion(tf.gather(predicted_labels, to_keep_indices),
-                                                          tf.gather(predictions_classifier_fake, to_keep_indices)) * self.adversarial_weight
+                    fake_classifier_loss = self.criterion(tf.one_hot(tf.gather(predicted_labels, to_keep_indices), depth=3),
+                                                         tf.gather(predictions_classifier_fake, to_keep_indices)) * self.adversarial_weight
 
             gradients = classifier_tape.gradient(fake_classifier_loss, self.classifier.trainable_variables)
             self.optimizer_classifier.apply_gradients(zip(gradients, self.classifier.trainable_variables))
@@ -156,6 +154,7 @@ class Trainer:
 
         # train classifier on real data
         with tf.GradientTape() as tape:
+
             predictions_classifier_real = self.classifier(images, training=True)
             real_classifier_loss = self.criterion(labels, predictions_classifier_real)
 
@@ -182,7 +181,7 @@ class Trainer:
         fake_label = tf.ones(batch_size)
 
         # generate random noise to feed generator
-        noise = tf.random.normal([batch_size, 256, 1, 1])
+        noise = tf.random.normal([batch_size, 16, 16, 256])
         fake_images = self.generator(noise, training=False)
 
         predictions_discriminator_real = self.discriminator(images, training=False)

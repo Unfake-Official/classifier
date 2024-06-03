@@ -4,7 +4,7 @@ class DCGAN_Generator(tf.keras.Model):
     def __init__(self):
         super(DCGAN_Generator, self).__init__()
 
-        self.deconv1 = tf.keras.layers.Conv2DTranspose(256 * 4, (4, 4), strides=(1, 1), padding='valid', use_bias=False)
+        self.deconv1 = tf.keras.layers.Conv2DTranspose(256 * 4, (4, 4), strides=(2, 2), padding='same', use_bias=False)
         self.batch_norm1 = tf.keras.layers.BatchNormalization()
         self.relu1 = tf.keras.layers.ReLU()
 

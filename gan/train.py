@@ -48,7 +48,7 @@ main_directory/
         img2
         ...
 '''
-DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset'
+DATASET_PATH = r'/Users/u22142/Documents/TCC/Dataset'
 
 # todo: Configure dataset for performance (cache and prefetch)
 train_ds, test_ds = tf.keras.utils.image_dataset_from_directory(
