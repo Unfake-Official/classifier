@@ -1,19 +1,20 @@
 from classifier import Classifier
 import numpy as np
+from keras import utils, models
 import tensorflow as tf
 
 CHECKPOINT_PATH = 'cnn/checkpoints/model'
 
 model = Classifier()
-model = tf.keras.models.load_model(CHECKPOINT_PATH)
+model = models.load_model(CHECKPOINT_PATH)
 
 IMG_PATH = r'C:\Users\mcsgo\Downloads\real.png'
 IMG_SIZE = (256, 256)
 
 class_names=['fake', 'other', 'real']
 
-img = tf.keras.utils.load_img(IMG_PATH, grayscale=True, target_size=IMG_SIZE)
-img_array = tf.keras.utils.img_to_array(img)
+img = utils.load_img(IMG_PATH, grayscale=True, target_size=IMG_SIZE)
+img_array = utils.img_to_array(img)
 img_array = tf.expand_dims(img_array, 0)
 
 predictions = model.predict(img_array)

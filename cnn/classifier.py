@@ -1,4 +1,4 @@
-import tensorflow as tf
+from keras import layers
 
 # CNN model sketch:
 
@@ -8,25 +8,25 @@ class Classifier(tf.keras.Model):
         super(Classifier, self).__init__()
 
         # convolution + feature extraction
-        self.conv1 = tf.keras.layers.Conv2D(16, (3, 3))
-        self.batch_norm1 = tf.keras.layers.BatchNormalization()
-        self.relu1 = tf.keras.layers.Activation('relu')
-        self.max_pool1 = tf.keras.layers.MaxPool2D(pool_size=2, strides=2)
-        self.conv2 = tf.keras.layers.Conv2D(32, (3, 3))
-        self.batch_norm2 = tf.keras.layers.BatchNormalization()
-        self.relu2 = tf.keras.layers.Activation('relu')
-        self.max_pool2 = tf.keras.layers.MaxPool2D(pool_size=2, strides=2)
-        self.conv3 = tf.keras.layers.Conv2D(64, (3, 3))
-        self.batch_norm3 = tf.keras.layers.BatchNormalization()
-        self.relu3 = tf.keras.layers.Activation('relu')
-        self.max_pool3 = tf.keras.layers.MaxPool2D(pool_size=2, strides=2)
+        self.conv1 = layers.Conv2D(16, (3, 3))
+        self.batch_norm1 = layers.BatchNormalization()
+        self.relu1 = layers.Activation('relu')
+        self.max_pool1 = layers.MaxPool2D(pool_size=2, strides=2)
+        self.conv2 = layers.Conv2D(32, (3, 3))
+        self.batch_norm2 = layers.BatchNormalization()
+        self.relu2 = layers.Activation('relu')
+        self.max_pool2 = layers.MaxPool2D(pool_size=2, strides=2)
+        self.conv3 = layers.Conv2D(64, (3, 3))
+        self.batch_norm3 = layers.BatchNormalization()
+        self.relu3 = layers.Activation('relu')
+        self.max_pool3 = layers.MaxPool2D(pool_size=2, strides=2)
 
-        self.dropout = tf.keras.layers.Dropout(0.5)
+        self.dropout = layers.Dropout(0.5)
 
         # dense layer + output
-        self.flatten = tf.keras.layers.Flatten()
-        self.d1 = tf.keras.layers.Dense(1024, activation='relu')
-        self.d2 = tf.keras.layers.Dense(3, activation='softmax')
+        self.flatten = layers.Flatten()
+        self.d1 = layers.Dense(1024, activation='relu')
+        self.d2 = layers.Dense(3, activation='softmax')
 
     def call(self, x):
         x = self.conv1(x)

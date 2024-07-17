@@ -1,24 +1,24 @@
-import tensorflow as tf
+from keras import layers, Model
 
-class DCGAN_Discriminator(tf.keras.Model):
+class DCGAN_Discriminator(Model):
     def __init__(self):
         super(DCGAN_Discriminator, self).__init__()
 
-        self.conv1 = tf.keras.layers.Conv2D(64, (4, 4), strides=(2, 2), padding='same', use_bias=False)
-        self.batch1 = tf.keras.layers.BatchNormalization()
-        self.leaky_relu1 = tf.keras.layers.LeakyReLU(alpha=0.2)
+        self.conv1 = layers.Conv2D(64, (4, 4), strides=(2, 2), padding='same', use_bias=False)
+        self.batch1 = layers.BatchNormalization()
+        self.leaky_relu1 = layers.LeakyReLU(alpha=0.2)
 
-        self.conv2 = tf.keras.layers.Conv2D(64 * 2, (4, 4), strides=(2, 2), padding='same', use_bias=False)
-        self.batch2 = tf.keras.layers.BatchNormalization()
-        self.leaky_relu2 = tf.keras.layers.LeakyReLU(alpha=0.2)
+        self.conv2 = layers.Conv2D(64 * 2, (4, 4), strides=(2, 2), padding='same', use_bias=False)
+        self.batch2 = layers.BatchNormalization()
+        self.leaky_relu2 = layers.LeakyReLU(alpha=0.2)
 
-        self.conv3 = tf.keras.layers.Conv2D(64 * 4, (4, 4), strides=(2, 2), padding='same', use_bias=False)
-        self.batch3 = tf.keras.layers.BatchNormalization()
-        self.leaky_relu3 = tf.keras.layers.LeakyReLU(alpha=0.2)
+        self.conv3 = layers.Conv2D(64 * 4, (4, 4), strides=(2, 2), padding='same', use_bias=False)
+        self.batch3 = layers.BatchNormalization()
+        self.leaky_relu3 = layers.LeakyReLU(alpha=0.2)
 
-        self.conv4 = tf.keras.layers.Conv2D(1, (4, 4), strides=(1, 1), padding='valid', use_bias=False)
-        self.flatten = tf.keras.layers.Flatten()
-        self.sigmoid = tf.keras.layers.Activation('sigmoid')
+        self.conv4 = layers.Conv2D(1, (4, 4), strides=(1, 1), padding='valid', use_bias=False)
+        self.flatten = layers.Flatten()
+        self.sigmoid = layers.Activation('sigmoid')
 
     def call(self, x):
         x = self.conv1(x)

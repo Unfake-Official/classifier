@@ -1,3 +1,4 @@
+from keras import metrics, losses, optimizers
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from model import VisionTransformer
@@ -9,15 +10,15 @@ import sys
 class Trainer:
     def __init__(self, model: VisionTransformer):
         self.model = model
-        self.loss_obj = tf.keras.losses.CategoricalCrossentropy()
-        self.optimizer = tf.keras.optimizers.Adam()
+        self.loss_obj = losses.CategoricalCrossentropy()
+        self.optimizer = optimizers.Adam()
 
         # loss metrics
-        self.train_loss = tf.keras.metrics.MeanSquaredError(name='train_loss')
-        self.train_accuracy = tf.keras.metrics.CategoricalAccuracy(
+        self.train_loss = metrics.MeanSquaredError(name='train_loss')
+        self.train_accuracy = metrics.CategoricalAccuracy(
             name='train_accuracy')
-        self.test_loss = tf.keras.metrics.MeanSquaredError(name='test_loss')
-        self.test_accuracy = tf.keras.metrics.CategoricalAccuracy(
+        self.test_loss = metrics.MeanSquaredError(name='test_loss')
+        self.test_accuracy = metrics.CategoricalAccuracy(
             name='test_accuracy')
 
         # metrics history
@@ -75,10 +76,10 @@ class Trainer:
         for epoch in range(epochs):
             print(f'\nEpoch {epoch+1}')
 
-            self.train_loss.reset_states()
-            self.train_accuracy.reset_states()
-            self.test_loss.reset_states()
-            self.test_accuracy.reset_states()
+            self.train_loss.reset_state()
+            self.train_accuracy.reset_state()
+            self.test_loss.reset_state()
+            self.test_accuracy.reset_state()
 
             print('Training')
             for train_images, train_labels in tqdm(train_ds):

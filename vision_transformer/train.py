@@ -1,7 +1,7 @@
 import os
-import tensorflow as tf
 from model import VisionTransformer
 from trainer import Trainer
+from keras import layers, utils
 
 EPOCHS = 100
 BATCH_SIZE = 32
@@ -31,11 +31,11 @@ DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset'
 
 model = VisionTransformer(IMG_SIZE[0], 4, 6, 3, 64, 4, 128, 1, 0.25)
 if os.path.exists(CHECKPOINT_PATH):
-    model = tf.keras.models.load_model(CHECKPOINT_PATH)
+    model = layers.TFSMLayer(CHECKPOINT_PATH, call_endpoint='serving_default')
     print('Model loaded successfully')
 
 # todo: Configure dataset for performance (cache and prefetch)
-train_ds, test_ds = tf.keras.utils.image_dataset_from_directory(
+train_ds, test_ds = utils.image_dataset_from_directory(
     DATASET_PATH,
     label_mode='categorical',
     color_mode='grayscale',

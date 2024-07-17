@@ -1,10 +1,10 @@
 # https://github.com/emla2805/vision-transformer/blob/master/model.py
 
 import tensorflow as tf
-import tensorflow_addons as tfa
+from keras import layers, Sequential, Model, activations
 
 
-class MultiHeadSelfAttention(tf.keras.layers.Layer):
+class MultiHeadSelfAttention(layers.Layer):
     def __init__(self, embed_dim, num_heads=8):
         super(MultiHeadSelfAttention, self).__init__()
         self.embed_dim = embed_dim
@@ -14,10 +14,10 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
                 f"embedding dimension = {embed_dim} should be divisible by number of heads = {num_heads}"
             )
         self.projection_dim = embed_dim // num_heads
-        self.query_dense = tf.keras.layers.Dense(embed_dim)
-        self.key_dense = tf.keras.layers.Dense(embed_dim)
-        self.value_dense = tf.keras.layers.Dense(embed_dim)
-        self.combine_heads = tf.keras.layers.Dense(embed_dim)
+        self.query_dense = layers.Dense(embed_dim)
+        self.key_dense = layers.Dense(embed_dim)
+        self.value_dense = layers.Dense(embed_dim)
+        self.combine_heads = layers.Dense(embed_dim)
 
     def attention(self, query, key, value):
         score = tf.matmul(query, key, transpose_b=True)
@@ -51,22 +51,22 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
         return output
 
 
-class TransformerBlock(tf.keras.layers.Layer):
+class TransformerBlock(layers.Layer):
     def __init__(self, embed_dim, num_heads, mlp_dim, dropout=0.1):
         super(TransformerBlock, self).__init__()
         self.att = MultiHeadSelfAttention(embed_dim, num_heads)
-        self.mlp = tf.keras.Sequential(
+        self.mlp = Sequential(
             [
-                tf.keras.layers.Dense(mlp_dim, activation=tfa.activations.gelu),
-                tf.keras.layers.Dropout(dropout),
-                tf.keras.layers.Dense(embed_dim),
-                tf.keras.layers.Dropout(dropout),
+                layers.Dense(mlp_dim, activation='gelu'),
+                layers.Dropout(dropout),
+                layers.Dense(embed_dim),
+                layers.Dropout(dropout),
             ]
         )
-        self.layernorm1 = tf.keras.layers.LayerNormalization(epsilon=1e-6)
-        self.layernorm2 = tf.keras.layers.LayerNormalization(epsilon=1e-6)
-        self.dropout1 = tf.keras.layers.Dropout(dropout)
-        self.dropout2 = tf.keras.layers.Dropout(dropout)
+        self.layernorm1 = layers.LayerNormalization(epsilon=1e-6)
+        self.layernorm2 = layers.LayerNormalization(epsilon=1e-6)
+        self.dropout1 = layers.Dropout(dropout)
+        self.dropout2 = layers.Dropout(dropout)
 
     def call(self, inputs, training):
         inputs_norm = self.layernorm1(inputs)
@@ -80,7 +80,7 @@ class TransformerBlock(tf.keras.layers.Layer):
         return mlp_output + out1
 
 
-class VisionTransformer(tf.keras.Model):
+class VisionTransformer(Model):
     def __init__(
         self,
         image_size,
@@ -105,17 +105,17 @@ class VisionTransformer(tf.keras.Model):
             "pos_emb", shape=(1, num_patches + 1, d_model)
         )
         self.class_emb = self.add_weight("class_emb", shape=(1, 1, d_model))
-        self.patch_proj = tf.keras.layers.Dense(d_model)
+        self.patch_proj = layers.Dense(d_model)
         self.enc_layers = [
             TransformerBlock(d_model, num_heads, mlp_dim, dropout)
             for _ in range(num_layers)
         ]
-        self.mlp_head = tf.keras.Sequential(
+        self.mlp_head = Sequential(
             [
-                tf.keras.layers.LayerNormalization(epsilon=1e-6),
-                tf.keras.layers.Dense(mlp_dim, activation=tfa.activations.gelu),
-                tf.keras.layers.Dropout(dropout),
-                tf.keras.layers.Dense(num_classes),
+                layers.LayerNormalization(epsilon=1e-6),
+                layers.Dense(mlp_dim, activation='gelu'),
+                layers.Dropout(dropout),
+                layers.Dense(num_classes),
             ]
         )
 

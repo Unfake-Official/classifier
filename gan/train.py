@@ -1,9 +1,9 @@
 import os
-import tensorflow as tf
 from trainer import Trainer
 from dcgan_discriminator import DCGAN_Discriminator
 from dcgan_generator import DCGAN_Generator
 from classifier import Classifier
+from keras import layers, utils
 
 EPOCHS = 100
 BATCH_SIZE = 32
@@ -21,15 +21,15 @@ discriminator = DCGAN_Discriminator()
 classifier = Classifier()
 
 if os.path.exists(G_CHECKPOINT_PATH):
-    generator = tf.keras.models.load_model(G_CHECKPOINT_PATH)
+    generator = layers.TFSMLayer(G_CHECKPOINT_PATH, call_endpoint='serving_default')
     print('Generator loaded successfully')
 
 if os.path.exists(D_CHECKPOINT_PATH):
-    discriminator = tf.keras.models.load_model(D_CHECKPOINT_PATH)
+    discriminator = layers.TFSMLayer(D_CHECKPOINT_PATH, call_endpoint='serving_default')
     print('Discriminator loaded successfully')
 
 if os.path.exists(C_CHECKPOINT_PATH):
-    classifier = tf.keras.models.load_model(C_CHECKPOINT_PATH)
+    classifier = layers.TFSMLayer(C_CHECKPOINT_PATH, call_endpoint='serving_default')
     print('Classifier loaded successfully')
 
 '''
@@ -51,7 +51,7 @@ main_directory/
 DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset'
 
 # todo: Configure dataset for performance (cache and prefetch)
-train_ds, test_ds = tf.keras.utils.image_dataset_from_directory(
+train_ds, test_ds = utils.image_dataset_from_directory(
     DATASET_PATH,
     label_mode='categorical',
     color_mode='grayscale',

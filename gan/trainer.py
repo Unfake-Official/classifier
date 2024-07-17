@@ -1,7 +1,7 @@
 import tensorflow as tf
+from keras import optimizers, losses, metrics
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import os
 
 from dcgan_generator import DCGAN_Generator
 from dcgan_discriminator import DCGAN_Discriminator
@@ -15,33 +15,33 @@ class Trainer:
         self.discriminator = discriminator
 
         # optimizers
-        self.optimizer_discriminator = tf.keras.optimizers.Adam(learning_rate=0.0002, beta_1=0.5, beta_2=0.999, weight_decay=1e-3)
-        self.optimizer_generator = tf.keras.optimizers.Adam(learning_rate=0.0002, beta_1=0.5, beta_2=0.999, weight_decay=1e-3)
-        self.optimizer_classifier = tf.keras.optimizers.Adam()
+        self.optimizer_discriminator = optimizers.Adam(learning_rate=0.0002, beta_1=0.5, beta_2=0.999, weight_decay=1e-3)
+        self.optimizer_generator = optimizers.Adam(learning_rate=0.0002, beta_1=0.5, beta_2=0.999, weight_decay=1e-3)
+        self.optimizer_classifier = optimizers.Adam()
 
         # losses
-        self.loss = tf.keras.losses.BinaryCrossentropy()
-        self.criterion = tf.keras.losses.CategoricalCrossentropy()
+        self.loss = losses.BinaryCrossentropy()
+        self.criterion = losses.CategoricalCrossentropy()
 
         # adversarial weight
         self.adversarial_weight = 0.1
 
         # loss metrics
-        self.train_loss_generator = tf.keras.metrics.MeanSquaredError(name='train_loss_generator')
-        self.train_loss_discriminator = tf.keras.metrics.MeanSquaredError(name='train_loss_discriminator')
-        self.train_loss_classifier = tf.keras.metrics.MeanSquaredError(name='train_loss_classifier')
+        self.train_loss_generator = metrics.MeanSquaredError(name='train_loss_generator')
+        self.train_loss_discriminator = metrics.MeanSquaredError(name='train_loss_discriminator')
+        self.train_loss_classifier = metrics.MeanSquaredError(name='train_loss_classifier')
 
-        self.train_accuracy_generator = tf.keras.metrics.CategoricalAccuracy(name='train_accuracy_generator')
-        self.train_accuracy_discriminator = tf.keras.metrics.CategoricalAccuracy(name='train_accuracy_discriminator')
-        self.train_accuracy_classifier = tf.keras.metrics.CategoricalAccuracy(name='train_accuracy_classifier')
+        self.train_accuracy_generator = metrics.CategoricalAccuracy(name='train_accuracy_generator')
+        self.train_accuracy_discriminator = metrics.CategoricalAccuracy(name='train_accuracy_discriminator')
+        self.train_accuracy_classifier = metrics.CategoricalAccuracy(name='train_accuracy_classifier')
 
-        self.test_loss_generator = tf.keras.metrics.MeanSquaredError(name='test_loss_generator')
-        self.test_loss_discriminator = tf.keras.metrics.MeanSquaredError(name='test_loss_discriminators')
-        self.test_loss_classifier = tf.keras.metrics.MeanSquaredError(name='test_loss_classifier')
+        self.test_loss_generator = metrics.MeanSquaredError(name='test_loss_generator')
+        self.test_loss_discriminator = metrics.MeanSquaredError(name='test_loss_discriminators')
+        self.test_loss_classifier = metrics.MeanSquaredError(name='test_loss_classifier')
 
-        self.test_accuracy_generator = tf.keras.metrics.CategoricalAccuracy(name='test_accuracy_generator')
-        self.test_accuracy_discriminator = tf.keras.metrics.CategoricalAccuracy(name='test_accuracy_discriminator')
-        self.test_accuracy_classifier = tf.keras.metrics.CategoricalAccuracy(name='test_accuracy_classifier')
+        self.test_accuracy_generator = metrics.CategoricalAccuracy(name='test_accuracy_generator')
+        self.test_accuracy_discriminator = metrics.CategoricalAccuracy(name='test_accuracy_discriminator')
+        self.test_accuracy_classifier = metrics.CategoricalAccuracy(name='test_accuracy_classifier')
 
         # metrics history
         self.train_loss_history_generator = []
@@ -211,20 +211,20 @@ class Trainer:
         for epoch in range(epochs):
             print(f'\nEpoch {epoch+1}')
 
-            self.train_loss_generator.reset_states()
-            self.train_accuracy_generator.reset_states()
-            self.test_loss_generator.reset_states()
-            self.test_accuracy_generator.reset_states()
+            self.train_loss_generator.reset_state()
+            self.train_accuracy_generator.reset_state()
+            self.test_loss_generator.reset_state()
+            self.test_accuracy_generator.reset_state()
 
-            self.train_loss_discriminator.reset_states()
-            self.train_accuracy_discriminator.reset_states()
-            self.test_loss_discriminator.reset_states()
-            self.test_accuracy_discriminator.reset_states()
+            self.train_loss_discriminator.reset_state()
+            self.train_accuracy_discriminator.reset_state()
+            self.test_loss_discriminator.reset_state()
+            self.test_accuracy_discriminator.reset_state()
 
-            self.train_loss_classifier.reset_states()
-            self.train_accuracy_classifier.reset_states()
-            self.test_loss_classifier.reset_states()
-            self.test_accuracy_classifier.reset_states()
+            self.train_loss_classifier.reset_state()
+            self.train_accuracy_classifier.reset_state()
+            self.test_loss_classifier.reset_state()
+            self.test_accuracy_classifier.reset_state()
 
             print('Training')
             for train_images, train_labels in tqdm(train_ds):

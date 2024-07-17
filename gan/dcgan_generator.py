@@ -1,23 +1,23 @@
-import tensorflow as tf
+from keras import layers, Model
 
-class DCGAN_Generator(tf.keras.Model):
+class DCGAN_Generator(Model):
     def __init__(self):
         super(DCGAN_Generator, self).__init__()
 
-        self.deconv1 = tf.keras.layers.Conv2DTranspose(256 * 4, (4, 4), strides=(2, 2), padding='same', use_bias=False)
-        self.batch_norm1 = tf.keras.layers.BatchNormalization()
-        self.relu1 = tf.keras.layers.ReLU()
+        self.deconv1 = layers.Conv2DTranspose(256 * 4, (4, 4), strides=(2, 2), padding='same', use_bias=False)
+        self.batch_norm1 = layers.BatchNormalization()
+        self.relu1 = layers.ReLU()
 
-        self.deconv2 = tf.keras.layers.Conv2DTranspose(256 * 2, (4, 4), strides=(2, 2), padding='same', use_bias=False)
-        self.batch_norm2 = tf.keras.layers.BatchNormalization()
-        self.relu2 = tf.keras.layers.ReLU()
+        self.deconv2 = layers.Conv2DTranspose(256 * 2, (4, 4), strides=(2, 2), padding='same', use_bias=False)
+        self.batch_norm2 = layers.BatchNormalization()
+        self.relu2 = layers.ReLU()
 
-        self.deconv3 = tf.keras.layers.Conv2DTranspose(256, (4, 4), strides=(2, 2), padding='same', use_bias=False)
-        self.batch_norm3 = tf.keras.layers.BatchNormalization()
-        self.relu3 = tf.keras.layers.ReLU()
+        self.deconv3 = layers.Conv2DTranspose(256, (4, 4), strides=(2, 2), padding='same', use_bias=False)
+        self.batch_norm3 = layers.BatchNormalization()
+        self.relu3 = layers.ReLU()
 
-        self.deconv4 = tf.keras.layers.Conv2DTranspose(1, (4, 4), strides=(2, 2), padding='same', use_bias=False)
-        self.tanh = tf.keras.layers.Activation('tanh')
+        self.deconv4 = layers.Conv2DTranspose(1, (4, 4), strides=(2, 2), padding='same', use_bias=False)
+        self.tanh = layers.Activation('tanh')
 
     def call(self, x):
         x = self.deconv1(x)
