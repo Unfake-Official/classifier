@@ -1,5 +1,5 @@
 import tensorflow as tf
-from keras import optimizers, losses, metrics
+from keras import optimizers, losses, metrics, ops
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
@@ -20,8 +20,8 @@ class Trainer:
         self.optimizer_classifier = optimizers.Adam()
 
         # losses
-        self.loss = losses.BinaryCrossentropy()
-        self.criterion = losses.CategoricalCrossentropy()
+        self.loss = losses.BinaryCrossentropy(from_logits=True)
+        self.criterion = losses.CategoricalCrossentropy(from_logits=True)
 
         # adversarial weight
         self.adversarial_weight = 0.1
@@ -95,8 +95,8 @@ class Trainer:
 
     def train_step(self, images, labels, batch_size):
 
-        true_label = tf.ones(batch_size)
-        fake_label = tf.ones(batch_size)
+        true_label = ops.ones(batch_size)
+        fake_label = ops.ones(batch_size)
 
         with tf.GradientTape() as generator_tape:
             with tf.GradientTape() as classifier_tape:
@@ -122,26 +122,26 @@ class Trainer:
 
                 # train classifier on fake data
                 predictions_classifier_fake = self.classifier(fake_images, training=True)
-                predicted_labels = tf.argmax(predictions_classifier_fake, axis=1)
+                predicted_labels = ops.argmax(predictions_classifier_fake, axis=1)
 
                 confidence_thresh = 0.5
 
-                predicted_labels = tf.cast(predicted_labels, tf.int32)
+                predicted_labels = ops.cast(predicted_labels, tf.int32)
 
                 # pseudo labeling threshold
-                probs = tf.nn.softmax(predictions_classifier_fake, axis=1)
-                most_likely_probs = tf.gather_nd(probs, tf.stack((tf.range(tf.size(predicted_labels)), predicted_labels), axis=1))
+                probs = ops.nn.softmax(predictions_classifier_fake, axis=1)
+                most_likely_probs = tf.gather_nd(probs, ops.stack((ops.arange(ops.size(predicted_labels)), predicted_labels), axis=1))
 
-                to_keep = tf.greater(most_likely_probs, confidence_thresh)
-                to_keep_indices = tf.where(to_keep)[:, 0] # get indices where condition is True
+                to_keep = ops.greater(most_likely_probs, confidence_thresh)
+                to_keep_indices = ops.where(to_keep)[:, 0] # get indices where condition is True
 
-                to_keep_indices = tf.cast(to_keep_indices, tf.int32)
+                to_keep_indices = ops.cast(to_keep_indices, tf.int32)
 
-                if tf.reduce_sum(tf.cast(to_keep, tf.int32)) != 0:
+                if tf.reduce_sum(ops.cast(to_keep, tf.int32)) != 0:
                     # compute fake classifier loss only if there are samples to keep
 
-                    fake_classifier_loss = self.criterion(tf.one_hot(tf.gather(predicted_labels, to_keep_indices), depth=3),
-                                                         tf.gather(predictions_classifier_fake, to_keep_indices)) * self.adversarial_weight
+                    fake_classifier_loss = self.criterion(ops.one_hot(ops.take(predicted_labels, to_keep_indices), depth=3),
+                                                         ops.take(predictions_classifier_fake, to_keep_indices)) * self.adversarial_weight
 
             gradients = classifier_tape.gradient(fake_classifier_loss, self.classifier.trainable_variables)
             self.optimizer_classifier.apply_gradients(zip(gradients, self.classifier.trainable_variables))
@@ -177,8 +177,8 @@ class Trainer:
         self.train_accuracy_classifier(labels, predictions_classifier_fake)
 
     def test_step(self, images, labels, batch_size):
-        true_label = tf.ones(batch_size)
-        fake_label = tf.ones(batch_size)
+        true_label = ops.ones(batch_size)
+        fake_label = ops.ones(batch_size)
 
         # generate random noise to feed generator
         noise = tf.random.normal([batch_size, 16, 16, 256])
@@ -251,8 +251,8 @@ class Trainer:
             self.test_loss_history_classifier.append(self.test_loss_generator.result())
             self.test_accuracy_history_classifier.append(self.test_accuracy_generator.result())
 
-            self.generator.save(generator_checkpoint_path)
-            self.discriminator.save(discriminator_checkpoint_path)
-            self.classifier.save(classifier_checkpoint_path)
+            self.generator.export(generator_checkpoint_path)
+            self.discriminator.export(discriminator_checkpoint_path)
+            self.classifier.export(classifier_checkpoint_path)
 
             self.plot(metrics_path)

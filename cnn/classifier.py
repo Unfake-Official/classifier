@@ -1,9 +1,9 @@
-from keras import layers
+from keras import layers, Model
 
 # CNN model sketch:
 
 
-class Classifier(tf.keras.Model):
+class Classifier(Model):
     def __init__(self):
         super(Classifier, self).__init__()
 

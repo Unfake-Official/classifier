@@ -1,7 +1,6 @@
 from model import VisionTransformer
 import numpy as np
-from keras import layers, utils
-import tensorflow as tf
+from keras import layers, utils, ops
 
 CHECKPOINT_PATH = 'cnn/checkpoints/model'
 
@@ -15,9 +14,9 @@ class_names=['fake', 'other', 'real']
 
 img = utils.load_img(IMG_PATH, grayscale=True, target_size=IMG_SIZE)
 img_array = utils.img_to_array(img)
-img_array = tf.expand_dims(img_array, 0)
+img_array = ops.expand_dims(img_array, 0)
 
 predictions = model.predict(img_array)
-score = tf.nn.softmax(predictions[0])
+score = ops.nn.softmax(predictions[0])
 
 print(f"Your audio is probably '{class_names[np.argmax(score)]}' with {100*np.max(score)}% confidence.")

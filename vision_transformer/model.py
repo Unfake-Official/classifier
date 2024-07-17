@@ -1,7 +1,7 @@
 # https://github.com/emla2805/vision-transformer/blob/master/model.py
 
 import tensorflow as tf
-from keras import layers, Sequential, Model, activations
+from keras import layers, Sequential, Model, ops
 
 
 class MultiHeadSelfAttention(layers.Layer):
@@ -11,7 +11,7 @@ class MultiHeadSelfAttention(layers.Layer):
         self.num_heads = num_heads
         if embed_dim % num_heads != 0:
             raise ValueError(
-                f"embedding dimension = {embed_dim} should be divisible by number of heads = {num_heads}"
+                f'embedding dimension = {embed_dim} should be divisible by number of heads = {num_heads}'
             )
         self.projection_dim = embed_dim // num_heads
         self.query_dense = layers.Dense(embed_dim)
@@ -20,21 +20,21 @@ class MultiHeadSelfAttention(layers.Layer):
         self.combine_heads = layers.Dense(embed_dim)
 
     def attention(self, query, key, value):
-        score = tf.matmul(query, key, transpose_b=True)
-        dim_key = tf.cast(tf.shape(key)[-1], tf.float32)
-        scaled_score = score / tf.math.sqrt(dim_key)
-        weights = tf.nn.softmax(scaled_score, axis=-1)
-        output = tf.matmul(weights, value)
+        score = ops.matmul(query, key, transpose_b=True)
+        dim_key = ops.cast(ops.shape(key)[-1], tf.float32)
+        scaled_score = score / ops.sqrt(dim_key)
+        weights = ops.nn.softmax(scaled_score, axis=-1)
+        output = ops.matmul(weights, value)
         return output, weights
 
     def separate_heads(self, x, batch_size):
-        x = tf.reshape(
+        x = ops.reshape(
             x, (batch_size, -1, self.num_heads, self.projection_dim)
         )
-        return tf.transpose(x, perm=[0, 2, 1, 3])
+        return ops.transpose(x, perm=[0, 2, 1, 3])
 
     def call(self, inputs):
-        batch_size = tf.shape(inputs)[0]
+        batch_size = ops.shape(inputs)[0]
         query = self.query_dense(inputs)
         key = self.key_dense(inputs)
         value = self.value_dense(inputs)
@@ -43,8 +43,8 @@ class MultiHeadSelfAttention(layers.Layer):
         value = self.separate_heads(value, batch_size)
 
         attention, weights = self.attention(query, key, value)
-        attention = tf.transpose(attention, perm=[0, 2, 1, 3])
-        concat_attention = tf.reshape(
+        attention = ops.transpose(attention, perm=[0, 2, 1, 3])
+        concat_attention = ops.reshape(
             attention, (batch_size, -1, self.embed_dim)
         )
         output = self.combine_heads(concat_attention)
@@ -102,9 +102,9 @@ class VisionTransformer(Model):
         self.num_layers = num_layers
 
         self.pos_emb = self.add_weight(
-            "pos_emb", shape=(1, num_patches + 1, d_model)
+            'pos_emb', shape=(1, num_patches + 1, d_model)
         )
-        self.class_emb = self.add_weight("class_emb", shape=(1, 1, d_model))
+        self.class_emb = self.add_weight('class_emb', shape=(1, 1, d_model))
         self.patch_proj = layers.Dense(d_model)
         self.enc_layers = [
             TransformerBlock(d_model, num_heads, mlp_dim, dropout)
@@ -120,26 +120,26 @@ class VisionTransformer(Model):
         )
 
     def extract_patches(self, images):
-        batch_size = tf.shape(images)[0]
-        patches = tf.image.extract_patches(
+        batch_size = ops.shape(images)[0]
+        patches = ops.image.extract_patches(
             images=images,
             sizes=[1, self.patch_size, self.patch_size, 1],
             strides=[1, self.patch_size, self.patch_size, 1],
             rates=[1, 1, 1, 1],
-            padding="VALID",
+            padding='VALID',
         )
-        patches = tf.reshape(patches, [batch_size, -1, self.patch_dim])
+        patches = ops.reshape(patches, [batch_size, -1, self.patch_dim])
         return patches
 
     def call(self, x, training):
-        batch_size = tf.shape(x)[0]
+        batch_size = ops.shape(x)[0]
         patches = self.extract_patches(x)
         x = self.patch_proj(patches)
 
-        class_emb = tf.broadcast_to(
+        class_emb = ops.broadcast_to(
             self.class_emb, [batch_size, 1, self.d_model]
         )
-        x = tf.concat([class_emb, x], axis=1)
+        x = ops.concatenate([class_emb, x], axis=1)
         x = x + self.pos_emb
 
         for layer in self.enc_layers:

@@ -10,7 +10,7 @@ import sys
 class Trainer:
     def __init__(self, model: Classifier):
         self.model = model
-        self.loss_obj = losses.CategoricalCrossentropy()
+        self.loss_obj = losses.CategoricalCrossentropy(from_logits=True)
         self.optimizer = optimizers.Adam()
 
         # loss metrics
@@ -95,7 +95,7 @@ class Trainer:
             self.test_loss_history.append(self.test_loss.result())
             self.test_accuracy_history.append(self.test_accuracy.result())
 
-            self.model.save(os.path.join(checkpoint_path))
+            self.model.export(os.path.join(checkpoint_path))
             self.plot(metrics_path)
 
             test_loss = self.test_loss.result()

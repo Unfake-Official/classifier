@@ -1,4 +1,4 @@
-from keras import layers, Model
+from keras import layers, Model, ops
 
 class DCGAN_Discriminator(Model):
     def __init__(self):
@@ -32,7 +32,7 @@ class DCGAN_Discriminator(Model):
         x = self.leaky_relu3(x)
         x = self.conv4(x)
         x = self.flatten(x)
-        x = tf.reduce_mean(x, axis=1)
+        x = ops.mean(x, axis=1)
         x = self.sigmoid(x)
 
         return x
