@@ -10,7 +10,7 @@ import sys
 class Trainer:
     def __init__(self, model: VisionTransformer):
         self.model = model
-        self.loss_obj = losses.CategoricalCrossentropy(from_logits=True)
+        self.loss_obj = losses.CategoricalCrossentropy()
         self.optimizer = optimizers.Adam()
 
         # loss metrics
@@ -49,17 +49,18 @@ class Trainer:
 
         fig.savefig(output, dpi=fig.dpi)
 
+    @tf.function
     def train_step(self, images, labels):
         with tf.GradientTape() as tape:
             predictions = self.model(images, training=True)
             loss = self.loss_obj(labels, predictions)
         gradients = tape.gradient(loss, self.model.trainable_variables)
-        self.optimizer.apply_gradients(
-            zip(gradients, self.model.trainable_variables))
+        self.optimizer.apply(gradients, self.model.trainable_variables)
 
         self.train_loss(labels, predictions)
         self.train_accuracy(labels, predictions)
 
+    @tf.function
     def test_step(self, images, labels):
         predictions = self.model(images, training=False)
 

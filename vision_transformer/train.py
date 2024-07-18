@@ -9,8 +9,8 @@ VALIDATION_SPLIT = 0.2
 
 IMG_SIZE = (256, 256)
 
-CHECKPOINT_PATH = 'cnn/checkpoints/model'
-METRICS_PATH = 'cnn/metrics/metrics.png'
+CHECKPOINT_PATH = 'vision_transformer/checkpoints/model'
+METRICS_PATH = 'vision_transformer/metrics/metrics.png'
 '''
 dataset folder with the following structure:
 main_directory/
