@@ -20,8 +20,8 @@ class Trainer:
         self.optimizer_classifier = optimizers.Adam()
 
         # losses
-        self.loss = losses.BinaryCrossentropy(from_logits=True)
-        self.criterion = losses.CategoricalCrossentropy(from_logits=True)
+        self.loss = losses.BinaryCrossentropy()
+        self.criterion = losses.CategoricalCrossentropy()
 
         # adversarial weight
         self.adversarial_weight = 0.1
@@ -93,6 +93,7 @@ class Trainer:
 
         fig.savefig(output, dpi=fig.dpi)
 
+    @tf.function
     def train_step(self, images, labels, batch_size):
 
         true_label = ops.ones(batch_size)
@@ -103,10 +104,12 @@ class Trainer:
                 # generate random noise to feed generator
                 noise = tf.random.normal([batch_size, 16, 16, 256])
                 fake_images = self.generator(noise, training=True)
+                fake_images = fake_images['output_1']
 
                 with tf.GradientTape() as discriminator_tape:
                     # train discriminator on real images
                     predictions_discriminator_real = self.discriminator(images, training=True)
+                    predictions_discriminator_real = predictions_discriminator_real['output_1']
                     loss_discriminator_real = self.loss(true_label, predictions_discriminator_real)
 
                 gradients = discriminator_tape.gradient(loss_discriminator_real, self.discriminator.trainable_variables)
@@ -115,6 +118,7 @@ class Trainer:
                 with tf.GradientTape() as discriminator_tape:
                     # train discriminator on fake images
                     predictions_discriminator_fake = self.discriminator(fake_images, training=True)
+                    predictions_discriminator_fake = predictions_discriminator_fake['output_1']
                     loss_discriminator_fake = self.loss(fake_label, predictions_discriminator_fake)
 
                 gradients = discriminator_tape.gradient(loss_discriminator_fake, self.discriminator.trainable_variables)
@@ -122,6 +126,7 @@ class Trainer:
 
                 # train classifier on fake data
                 predictions_classifier_fake = self.classifier(fake_images, training=True)
+                predictions_classifier_fake = predictions_classifier_fake['output_1']
                 predicted_labels = ops.argmax(predictions_classifier_fake, axis=1)
 
                 confidence_thresh = 0.5
@@ -133,18 +138,18 @@ class Trainer:
                 most_likely_probs = tf.gather_nd(probs, ops.stack((ops.arange(ops.size(predicted_labels)), predicted_labels), axis=1))
 
                 to_keep = ops.greater(most_likely_probs, confidence_thresh)
-                to_keep_indices = ops.where(to_keep)[:, 0] # get indices where condition is True
+                to_keep_indices = ops.where(to_keep) # get indices where condition is True
 
                 to_keep_indices = ops.cast(to_keep_indices, tf.int32)
 
                 if tf.reduce_sum(ops.cast(to_keep, tf.int32)) != 0:
                     # compute fake classifier loss only if there are samples to keep
 
-                    fake_classifier_loss = self.criterion(ops.one_hot(ops.take(predicted_labels, to_keep_indices), depth=3),
-                                                         ops.take(predictions_classifier_fake, to_keep_indices)) * self.adversarial_weight
+                    fake_classifier_loss = self.criterion(ops.take(predicted_labels, to_keep_indices),
+                                                          ops.take(predictions_classifier_fake, to_keep_indices)) * self.adversarial_weight
 
-            gradients = classifier_tape.gradient(fake_classifier_loss, self.classifier.trainable_variables)
-            self.optimizer_classifier.apply_gradients(zip(gradients, self.classifier.trainable_variables))
+                    gradients = classifier_tape.gradient(fake_classifier_loss, self.classifier.trainable_variables)
+                    self.optimizer_classifier.apply_gradients(zip(gradients, self.classifier.trainable_variables))
 
             # train generator
             loss_generator = self.loss(true_label, predictions_discriminator_fake)
@@ -156,6 +161,7 @@ class Trainer:
         with tf.GradientTape() as tape:
 
             predictions_classifier_real = self.classifier(images, training=True)
+            predictions_classifier_real = predictions_classifier_real['output_1']
             real_classifier_loss = self.criterion(labels, predictions_classifier_real)
 
         gradients = tape.gradient(real_classifier_loss, self.classifier.trainable_variables)
@@ -176,6 +182,7 @@ class Trainer:
         self.train_accuracy_classifier(labels, predictions_classifier_real)
         self.train_accuracy_classifier(labels, predictions_classifier_fake)
 
+    @tf.function
     def test_step(self, images, labels, batch_size):
         true_label = ops.ones(batch_size)
         fake_label = ops.ones(batch_size)
@@ -183,27 +190,32 @@ class Trainer:
         # generate random noise to feed generator
         noise = tf.random.normal([batch_size, 16, 16, 256])
         fake_images = self.generator(noise, training=False)
+        fake_images = fake_images['output_1']
 
         predictions_discriminator_real = self.discriminator(images, training=False)
+        predictions_discriminator_real = predictions_discriminator_real['output_1']
         predictions_discriminator_fake = self.discriminator(fake_images, training=False)
+        predictions_discriminator_fake = predictions_discriminator_fake['output_1']
 
         predictions_classifier_real = self.classifier(images, training=False)
+        predictions_classifier_real = predictions_classifier_real['output_1']
         predictions_classifier_fake = self.classifier(fake_images, training=False)
+        predictions_classifier_fake = predictions_classifier_fake['output_1']
 
-        self.train_loss_discriminator(true_label, predictions_discriminator_real)
-        self.train_loss_discriminator(fake_label, predictions_discriminator_fake)
+        self.test_loss_discriminator(true_label, predictions_discriminator_real)
+        self.test_loss_discriminator(fake_label, predictions_discriminator_fake)
 
-        self.train_accuracy_discriminator(true_label, predictions_discriminator_real)
-        self.train_accuracy_discriminator(fake_label, predictions_discriminator_fake)
+        self.test_accuracy_discriminator(true_label, predictions_discriminator_real)
+        self.test_accuracy_discriminator(fake_label, predictions_discriminator_fake)
 
-        self.train_loss_generator(true_label, predictions_discriminator_fake)
-        self.train_accuracy_generator(true_label, predictions_discriminator_fake)
+        self.test_loss_generator(true_label, predictions_discriminator_fake)
+        self.test_accuracy_generator(true_label, predictions_discriminator_fake)
 
-        self.train_loss_classifier(labels, predictions_classifier_real)
-        self.train_loss_classifier(labels, predictions_classifier_fake)
+        self.test_loss_classifier(labels, predictions_classifier_real)
+        self.test_loss_classifier(labels, predictions_classifier_fake)
 
-        self.train_accuracy_classifier(labels, predictions_classifier_real)
-        self.train_accuracy_classifier(labels, predictions_classifier_fake)
+        self.test_accuracy_classifier(labels, predictions_classifier_real)
+        self.test_accuracy_classifier(labels, predictions_classifier_fake)
 
     def train(self, epochs: int, train_ds, test_ds, generator_checkpoint_path: str, discriminator_checkpoint_path: str, classifier_checkpoint_path: str, metrics_path: str):
         print(f'Number of epochs: {epochs}')
