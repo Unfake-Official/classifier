@@ -3,7 +3,7 @@ from trainer import Trainer
 from dcgan_discriminator import DCGAN_Discriminator
 from dcgan_generator import DCGAN_Generator
 from classifier import Classifier
-from keras import layers, utils
+from keras import layers, utils, Sequential
 
 EPOCHS = 100
 BATCH_SIZE = 32
@@ -21,15 +21,15 @@ discriminator = DCGAN_Discriminator()
 classifier = Classifier()
 
 if os.path.exists(G_CHECKPOINT_PATH):
-    generator = layers.TFSMLayer(G_CHECKPOINT_PATH, call_endpoint='serving_default')
+    generator = Sequential([layers.TFSMLayer(G_CHECKPOINT_PATH, call_endpoint='serving_default')])
     print('Generator loaded successfully')
 
 if os.path.exists(D_CHECKPOINT_PATH):
-    discriminator = layers.TFSMLayer(D_CHECKPOINT_PATH, call_endpoint='serving_default')
+    discriminator = Sequential([layers.TFSMLayer(D_CHECKPOINT_PATH, call_endpoint='serving_default')])
     print('Discriminator loaded successfully')
 
 if os.path.exists(C_CHECKPOINT_PATH):
-    classifier = layers.TFSMLayer(C_CHECKPOINT_PATH, call_endpoint='serving_default')
+    classifier = Sequential([layers.TFSMLayer(C_CHECKPOINT_PATH, call_endpoint='serving_default')])
     print('Classifier loaded successfully')
 
 '''
@@ -48,7 +48,7 @@ main_directory/
         img2
         ...
 '''
-DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset'
+DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset2'
 
 # todo: Configure dataset for performance (cache and prefetch)
 train_ds, test_ds = utils.image_dataset_from_directory(

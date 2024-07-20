@@ -1,5 +1,5 @@
 import os
-from keras import layers, utils
+from keras import layers, utils, Sequential
 from classifier import Classifier
 from trainer import Trainer
 
@@ -31,7 +31,7 @@ DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset'
 
 model = Classifier()
 if os.path.exists(CHECKPOINT_PATH):
-    model = layers.TFSMLayer(CHECKPOINT_PATH, call_endpoint='serving_default')
+    model = Sequential([layers.TFSMLayer(CHECKPOINT_PATH, call_endpoint='serving_default')])
     print('Model loaded successfully')
 
 # todo: Configure dataset for performance (cache and prefetch)

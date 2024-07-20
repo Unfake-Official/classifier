@@ -1,7 +1,7 @@
 import os
 from model import VisionTransformer
 from trainer import Trainer
-from keras import layers, utils
+from keras import layers, utils, Sequential
 
 EPOCHS = 100
 BATCH_SIZE = 32
@@ -31,7 +31,7 @@ DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset'
 
 model = VisionTransformer(IMG_SIZE[0], 4, 6, 3, 64, 4, 128, 1, 0.25)
 if os.path.exists(CHECKPOINT_PATH):
-    model = layers.TFSMLayer(CHECKPOINT_PATH, call_endpoint='serving_default')
+    model = Sequential([layers.TFSMLayer(CHECKPOINT_PATH, call_endpoint='serving_default')])
     print('Model loaded successfully')
 
 # todo: Configure dataset for performance (cache and prefetch)
