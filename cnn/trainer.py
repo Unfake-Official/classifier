@@ -3,6 +3,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from classifier import Classifier
 from tqdm import tqdm
+import numpy as np
 import os
 import sys
 
@@ -49,6 +50,13 @@ class Trainer:
 
         fig.savefig(output, dpi=fig.dpi)
 
+    def save_csv(self, output):
+        np.savetxt(output, [p for p in
+                                  zip(self.train_loss_history,
+                                      self.train_accuracy_history,
+                                      self.test_loss_history,
+                                      self.test_accuracy_history)], delimiter=',', fmt='%s')
+
     @tf.function
     def train_step(self, images, labels):
         with tf.GradientTape() as tape:
@@ -70,7 +78,7 @@ class Trainer:
         self.test_loss(labels, predictions)
         self.test_accuracy(labels, predictions)
 
-    def train(self, epochs: int, train_ds, test_ds, checkpoint_path: str, metrics_path: str):
+    def train(self, epochs: int, train_ds, test_ds, checkpoint_path: str, metrics_path: str, csv_path: str):
         print(f'Number of epochs: {epochs}')
 
         patience = 15
@@ -101,6 +109,7 @@ class Trainer:
 
             self.model.export(os.path.join(checkpoint_path))
             self.plot(metrics_path)
+            self.save_csv(csv_path)
 
             test_loss = self.test_loss.result()
 

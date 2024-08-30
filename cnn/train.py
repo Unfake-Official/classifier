@@ -11,6 +11,7 @@ IMG_SIZE = (256, 256)
 
 CHECKPOINT_PATH = 'cnn/checkpoints/model'
 METRICS_PATH = 'cnn/metrics/metrics.png'
+CSV_PATH = 'cnn/metrics/metrics.csv'
 '''
 dataset folder with the following structure:
 main_directory/
@@ -46,4 +47,4 @@ train_ds, test_ds = utils.image_dataset_from_directory(
     batch_size=BATCH_SIZE)
 
 trainer = Trainer(model=model)
-trainer.train(epochs=EPOCHS, train_ds=train_ds, test_ds=test_ds, checkpoint_path=CHECKPOINT_PATH, metrics_path=METRICS_PATH)
+trainer.train(epochs=EPOCHS, train_ds=train_ds, test_ds=test_ds, checkpoint_path=CHECKPOINT_PATH, metrics_path=METRICS_PATH, csv_path=CSV_PATH)

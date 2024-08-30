@@ -26,7 +26,7 @@ class Classifier(Model):
         # dense layer + output
         self.flatten = layers.Flatten()
         self.d1 = layers.Dense(1024, activation='relu')
-        self.d2 = layers.Dense(3, activation='softmax')
+        self.d2 = layers.Dense(2, activation='softmax')
 
     def call(self, x):
         x = self.conv1(x)

@@ -10,7 +10,7 @@ model = models.load_model(CHECKPOINT_PATH)
 IMG_PATH = r'C:\Users\mcsgo\Downloads\real.png'
 IMG_SIZE = (256, 256)
 
-class_names=['fake', 'other', 'real']
+class_names=['fake', 'real']
 
 img = utils.load_img(IMG_PATH, grayscale=True, target_size=IMG_SIZE)
 img_array = utils.img_to_array(img)
