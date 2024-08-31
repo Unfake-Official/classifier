@@ -61,7 +61,6 @@ class Trainer:
     def train_step(self, images, labels):
         with tf.GradientTape() as tape:
             predictions = self.model(images, training=True)
-            predictions = predictions['output_1']
             loss = self.loss_obj(labels, predictions)
         gradients = tape.gradient(loss, self.model.trainable_variables)
         self.optimizer.apply_gradients(
@@ -73,7 +72,6 @@ class Trainer:
     @tf.function
     def test_step(self, images, labels):
         predictions = self.model(images, training=False)
-        predictions = predictions['output_1']
 
         self.test_loss(labels, predictions)
         self.test_accuracy(labels, predictions)
@@ -81,9 +79,9 @@ class Trainer:
     def train(self, epochs: int, train_ds, test_ds, checkpoint_path: str, metrics_path: str, csv_path: str):
         print(f'Number of epochs: {epochs}')
 
-        patience = 15
-        wait = 0
-        best = sys.maxsize
+        # patience = 15
+        # wait = 0
+        # best = sys.maxsize
 
         for epoch in range(epochs):
             print(f'\nEpoch {epoch+1}')
@@ -111,11 +109,11 @@ class Trainer:
             self.plot(metrics_path)
             self.save_csv(csv_path)
 
-            test_loss = self.test_loss.result()
+            # test_loss = self.test_loss.result()
 
-            wait += 1
-            if test_loss < best:
-                best = test_loss
-                wait = 0
-            if wait >= patience:
-                break
+            # wait += 1
+            # if test_loss < best:
+            #     best = test_loss
+            #     wait = 0
+            # if wait >= patience:
+            #     break
