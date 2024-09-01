@@ -3,7 +3,7 @@ from keras import layers, utils, Sequential
 from classifier import Classifier
 from trainer import Trainer
 
-EPOCHS = 100
+EPOCHS = 10
 BATCH_SIZE = 128
 VALIDATION_SPLIT = 0.2
 
