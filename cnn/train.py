@@ -3,7 +3,7 @@ from keras import layers, utils, Sequential
 from classifier import Classifier
 from trainer import Trainer
 
-EPOCHS = 10
+EPOCHS = 100
 BATCH_SIZE = 128
 VALIDATION_SPLIT = 0.2
 
@@ -19,16 +19,12 @@ main_directory/
         img1
         img2
         ...
-    other/
-        img1
-        img2
-        ...
     real/
         img1
         img2
         ...
 '''
-DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset'
+DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\DatasetColored'
 
 model = Classifier()
 if os.path.exists(CHECKPOINT_PATH):
@@ -41,7 +37,7 @@ train_ds, test_ds = utils.image_dataset_from_directory(
     DATASET_PATH,
     labels='inferred',
     label_mode='categorical',
-    color_mode='grayscale',
+    color_mode='rgb',
     validation_split=VALIDATION_SPLIT,
     subset='both',
     seed=123,
