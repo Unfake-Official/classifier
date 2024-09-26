@@ -7,7 +7,7 @@ EPOCHS = 100
 BATCH_SIZE = 128
 VALIDATION_SPLIT = 0.2
 
-IMG_SIZE = (256, 256)
+IMG_SIZE = (512, 256)
 
 CHECKPOINT_PATH = 'cnn/checkpoints/model'
 METRICS_PATH = 'cnn/metrics/metrics.png'
@@ -24,7 +24,7 @@ main_directory/
         img2
         ...
 '''
-DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset - Color and Wider'
+DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset v2'
 
 model = Classifier()
 if os.path.exists(CHECKPOINT_PATH):

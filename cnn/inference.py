@@ -8,7 +8,7 @@ model = Classifier()
 model = models.load_model(CHECKPOINT_PATH)
 
 IMG_PATH = r'C:\Users\mcsgo\Downloads\real.png'
-IMG_SIZE = (256, 256)
+IMG_SIZE = (512, 256)
 
 class_names=['fake', 'real']
 
