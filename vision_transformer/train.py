@@ -7,7 +7,7 @@ EPOCHS = 100
 BATCH_SIZE = 32
 VALIDATION_SPLIT = 0.2
 
-IMG_SIZE = (256, 256)
+IMG_SIZE = (512, 256)
 
 CHECKPOINT_PATH = 'vision_transformer/checkpoints/model'
 METRICS_PATH = 'vision_transformer/metrics/metrics.png'
@@ -27,7 +27,7 @@ main_directory/
         img2
         ...
 '''
-DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset'
+DATASET_PATH = r'ds_path'
 
 model = VisionTransformer(IMG_SIZE[0], 4, 6, 3, 64, 4, 128, 1, 0.25)
 if os.path.exists(CHECKPOINT_PATH):
@@ -38,7 +38,7 @@ if os.path.exists(CHECKPOINT_PATH):
 train_ds, test_ds = utils.image_dataset_from_directory(
     DATASET_PATH,
     label_mode='categorical',
-    color_mode='grayscale',
+    color_mode='rgb',
     validation_split=VALIDATION_SPLIT,
     subset='both',
     seed=123,

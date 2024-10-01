@@ -24,7 +24,7 @@ main_directory/
         img2
         ...
 '''
-DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset v2'
+DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset_ofc'
 
 model = Classifier()
 if os.path.exists(CHECKPOINT_PATH):

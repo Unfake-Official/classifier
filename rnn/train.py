@@ -7,11 +7,12 @@ EPOCHS = 100
 BATCH_SIZE = 128
 VALIDATION_SPLIT = 0.2
 
-IMG_SIZE = (256, 256)
+IMG_SIZE = (512, 256)
 
 CHECKPOINT_PATH = 'rnn/checkpoints/model'
 METRICS_PATH = 'rnn/metrics/metrics.png'
 CSV_PATH = 'rnn/metrics/metrics.csv'
+
 '''
 dataset folder with the following structure:
 main_directory/
@@ -24,7 +25,7 @@ main_directory/
         img2
         ...
 '''
-DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\DatasetColored'
+DATASET_PATH = r'ds_path'
 
 model = Classifier()
 if os.path.exists(CHECKPOINT_PATH):

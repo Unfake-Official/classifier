@@ -1,7 +1,5 @@
 from keras import layers, Model
 
-# CNN model sketch:
-
 
 class Classifier(Model):
     def __init__(self):
@@ -26,9 +24,9 @@ class Classifier(Model):
         # dense layer + output
         self.flatten = layers.Flatten()
         self.d1 = layers.Dense(1024, activation='relu')
-        self.d2 = layers.Dense(3, activation='softmax')
+        self.d2 = layers.Dense(2, activation='softmax')
 
-    def call(self, x):
+    def call(self, x, training=True):
         x = self.conv1(x)
         x = self.batch_norm1(x)
         x = self.relu1(x)
@@ -41,7 +39,8 @@ class Classifier(Model):
         x = self.batch_norm3(x)
         x = self.relu3(x)
         x = self.max_pool3(x)
-        x = self.dropout(x)
+        if training:
+            x = self.dropout(x)
 
         x = self.flatten(x)
         x = self.d1(x)

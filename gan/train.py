@@ -9,7 +9,7 @@ EPOCHS = 100
 BATCH_SIZE = 32
 VALIDATION_SPLIT = 0.2
 
-IMG_SIZE = (256, 256)
+IMG_SIZE = (512, 256)
 
 G_CHECKPOINT_PATH = 'gan/checkpoints/generator'
 D_CHECKPOINT_PATH = 'gan/checkpoints/discriminator'
@@ -39,22 +39,18 @@ main_directory/
         img1
         img2
         ...
-    other/
-        img1
-        img2
-        ...
     real/
         img1
         img2
         ...
 '''
-DATASET_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\Dataset2'
+DATASET_PATH = r'ds_path'
 
 # todo: Configure dataset for performance (cache and prefetch)
 train_ds, test_ds = utils.image_dataset_from_directory(
     DATASET_PATH,
     label_mode='categorical',
-    color_mode='grayscale',
+    color_mode='rgb',
     validation_split=VALIDATION_SPLIT,
     subset='both',
     seed=123,

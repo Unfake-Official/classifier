@@ -3,7 +3,7 @@ from keras import utils, Sequential, layers, metrics
 from tqdm import tqdm
 
 CHECKPOINT_PATH = 'cnn/checkpoints/model'
-FOLDER_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\VCTK+ASVSPOOF'
+FOLDER_PATH = r'folder_path'
 
 model = Classifier()
 model = Sequential([layers.TFSMLayer(CHECKPOINT_PATH, call_endpoint='serving_default')])
