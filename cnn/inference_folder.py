@@ -3,29 +3,26 @@ from keras import utils, Sequential, layers, metrics
 from tqdm import tqdm
 
 CHECKPOINT_PATH = 'cnn/checkpoints/model'
-FOLDER_PATH = 'C:\Users\mcsgo\OneDrive\Documentos\TCC\VCTK-Corpus-SPEC'
+FOLDER_PATH = r'C:\Users\mcsgo\OneDrive\Documentos\TCC\VCTK+ASVSPOOF'
 
 model = Classifier()
 model = Sequential([layers.TFSMLayer(CHECKPOINT_PATH, call_endpoint='serving_default')])
 
-_, test_ds = utils.image_dataset_from_directory(
+ds = utils.image_dataset_from_directory(
     FOLDER_PATH,
     labels='inferred',
     label_mode='categorical',
     color_mode='rgb',
-    validation_split=1,
-    subset='both',
+    validation_split=0,
     seed=123,
     image_size=(512, 256))
 
-IMG_PATH = r'C:\Users\mcsgo\Downloads\real.png'
-IMG_SIZE = (512, 256)
+loss = metrics.MeanSquaredError(name='loss')
+accuracy = metrics.CategoricalAccuracy(name='accuracy')
 
-loss = metrics.MeanSquaredError(name='test_loss')
-accuracy = metrics.CategoricalAccuracy(name='test_accuracy')
-
-for images, labels in tqdm(test_ds):
+for images, labels in tqdm(ds):
     predictions = model(images, training=False)
+    predictions = predictions['output_0']
 
     loss(labels, predictions)
     accuracy(labels, predictions)
