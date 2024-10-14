@@ -4,21 +4,20 @@ import matplotlib.pyplot as plt
 from classifier import Classifier
 from tqdm import tqdm
 import numpy as np
-import os
 import sys
 
 
 class Trainer:
-    def __init__(self, model: Classifier):
+    def __init__(self, model: Classifier, learning_rate: float = 0.01):
         self.model = model
         self.loss_obj = losses.CategoricalCrossentropy()
-        self.optimizer = optimizers.Adam()
+        self.optimizer = optimizers.Adam(learning_rate)
 
         # loss metrics
-        self.train_loss = metrics.MeanSquaredError(name='train_loss')
+        self.train_loss = metrics.CategoricalCrossentropy(name='train_loss')
         self.train_accuracy = metrics.CategoricalAccuracy(
             name='train_accuracy')
-        self.test_loss = metrics.MeanSquaredError(name='test_loss')
+        self.test_loss = metrics.CategoricalCrossentropy(name='test_loss')
         self.test_accuracy = metrics.CategoricalAccuracy(
             name='test_accuracy')
 
@@ -105,7 +104,7 @@ class Trainer:
             self.test_loss_history.append(self.test_loss.result())
             self.test_accuracy_history.append(self.test_accuracy.result())
 
-            self.model.export(os.path.join(checkpoint_path))
+            self.model.save(checkpoint_path)
             self.plot(metrics_path)
             self.save_csv(csv_path)
 

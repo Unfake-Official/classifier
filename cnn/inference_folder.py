@@ -1,12 +1,11 @@
 from classifier import Classifier
-from keras import utils, Sequential, layers, metrics
+from keras import utils, models, metrics
 from tqdm import tqdm
 
-CHECKPOINT_PATH = 'cnn/checkpoints/model'
+CHECKPOINT_PATH = 'cnn/checkpoints/model.keras'
 FOLDER_PATH = r'folder_path'
 
-model = Classifier()
-model = Sequential([layers.TFSMLayer(CHECKPOINT_PATH, call_endpoint='serving_default')])
+model = models.load_model(CHECKPOINT_PATH)
 
 ds = utils.image_dataset_from_directory(
     FOLDER_PATH,
@@ -17,7 +16,7 @@ ds = utils.image_dataset_from_directory(
     seed=123,
     image_size=(512, 256))
 
-loss = metrics.MeanSquaredError(name='loss')
+loss = metrics.CategoricalCrossentropy(name='loss')
 accuracy = metrics.CategoricalAccuracy(name='accuracy')
 
 for images, labels in tqdm(ds):
